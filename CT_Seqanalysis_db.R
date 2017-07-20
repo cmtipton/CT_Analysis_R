@@ -26,14 +26,16 @@
 
 
 #get rid of warnings because of data.table call
-#test test testing
-
 
 	oldw <- getOption("warn")
 	options(warn = -1)
 
 #establish input and output file locations
 #testing a second change in the code for github
+#testing another change from laptop testing
+
+
+
 
 location <- '/Users/cmtipto/Desktop/Test'
 
