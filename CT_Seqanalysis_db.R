@@ -31,7 +31,7 @@
 	options(warn = -1)
 
 #establish input and output file locations
-#testing a change in the code for github
+#testing a second change in the code for github
 
 location <- '/Users/cmtipto/Desktop/Test'
 
