@@ -19,7 +19,7 @@
 	sqlite.driver <- dbDriver("SQLite")
 	db <- dbConnect(sqlite.driver,
                 dbname = filename)
-                
+
 	mytable <<- dbReadTable(db, 'sequence')
 	}
 
@@ -31,6 +31,7 @@
 	options(warn = -1)
 
 #establish input and output file locations
+#testing a change in the code for github
 
 location <- '/Users/cmtipto/Desktop/Test'
 
@@ -47,7 +48,7 @@ location <- '/Users/cmtipto/Desktop/Test'
 	dbfile <- paste0(location2, "/", dblocation[1])
 	loadsql(dbfile)
 
-	
+
 #establish function to change column names of grouped lineage file
 
 	changelin <- function(loc){
@@ -74,7 +75,7 @@ location <- '/Users/cmtipto/Desktop/Test'
 
 
 	poplist <- list()
-	
+
 	for (p in 1:numpops){
 		file.merged <- paste0(location, '/mergeOutput')
 		file.merged.list <- list.dirs(file.merged)
@@ -83,10 +84,10 @@ location <- '/Users/cmtipto/Desktop/Test'
 		jy <- sub("_S[0-9]+", "", j)
 		poplist[p] <- jy
 		}
-	
-		
 
-	
+
+
+
 
 #make data frame that will hold population names and info
 
@@ -97,15 +98,15 @@ location <- '/Users/cmtipto/Desktop/Test'
 		seq.info[j,1] <- poplist[j]
 		}
 	colnames(seq.info) <- c('Population')
-	
+
 
 
 #Make Grouped Lineage Data Frame
 
 
-value <-  as.numeric( as.character(mytable$lineageID) ) # get the numbers 
-noninteger <- value %% 1 != 0   # see if there's a fractional part 
-noninteger <- noninteger | is.na(noninteger)  # get rid of the NA's 
+value <-  as.numeric( as.character(mytable$lineageID) ) # get the numbers
+noninteger <- value %% 1 != 0   # see if there's a fractional part
+noninteger <- noninteger | is.na(noninteger)  # get rid of the NA's
 non.single <- mytable[!noninteger,]
 lineage.data <- non.single[,c('population', 'lineageID', 'Vgene')]
 table.x <- table(lineage.data$lineage, lineage.data$population)
@@ -127,7 +128,7 @@ data.x <- as.data.frame.matrix(y)
 		colnames(seqlin)[1] <- 'Sequences'
 		colnames(seqlin)[2] <- 'Lineages'
 		}
-	
+
 	seq.info <- cbind(seq.info, seqlin)
 	print(seq.info)
 
@@ -168,7 +169,7 @@ data.x <- as.data.frame.matrix(y)
 			perc.x_y <- lin.x_y/lin.x * 100
 			percof.df[m,n] <- round(perc.x_y,2)
 			}
-		colnames(percof.df)[m] <- colnames(data.x)[m+4]	
+		colnames(percof.df)[m] <- colnames(data.x)[m+4]
 		}
 
 #rename columns
@@ -188,7 +189,7 @@ data.x <- as.data.frame.matrix(y)
 	for (i in 1:numpops){
 		mor.mat[i,i] <- 1.0
 		}
-		
+
 #rename columns
 
 	mor.df <- as.data.frame(mor.mat)
@@ -196,8 +197,8 @@ data.x <- as.data.frame.matrix(y)
 	colnames(mor.mat)[l] <- paste0('MI_', colnames(mor.mat)[l])
 	}
 
-	
-	
+
+
 #Add Morisita index values to seq.info data frame
 
 	seq.info <- cbind(seq.info, mor.mat)
@@ -213,10 +214,10 @@ iso.out <- paste0(file.out, 'IsotypeInfo/')
 
 dir.create(file.path(iso.out, 'Isotype_Pie_Charts'), showWarnings = FALSE)
 out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
-		
-		
+
+
 	iso.info <<- data.frame()
-	
+
 	for (n in 1:numpops){
 		merge.dir <- paste0(location, '/mergeOutput/')
 		merge.list <- list.files(merge.dir)
@@ -263,8 +264,8 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 		iso.info[n, 28] <- round(median(IgA$Mutation.Rate), 2)
 		iso.info[n, 29] <- round(median(IgE$Mutation.Rate), 2)
 		iso.info[n, 30] <- round(median(IgU$Mutation.Rate), 2)
-		
-		
+
+
 		a <- filter(Ig, Isotype == 'A')
 		g <- filter(Ig, Isotype == 'G')
 		e <- filter(Ig, Isotype == 'E')
@@ -275,15 +276,15 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 
 		#pdf(paste0(file.out.isopie, merge.list[n],'_IsotypePie.pdf'), width = 15, height = 9)
 		#p <- pie(slices, labels = lbs, col=c("#b0923b", "#8960b3", "#56ae6c", "#ba495b"), cex = 1.5)
-		
-		
+
+
 		slices <- c(nrow(m), nrow(g), nrow(a))
 		lbs <- c('IgM', 'IgG', 'IgA')
 
 		pdf(paste0(out.isopie, merge.list[n],'_IsotypePie.pdf'), width = 7, height = 7)
 		p <- pie(slices, labels = lbs, col=c("#bc5d41", "#84a955", "#965da7"), cex = 1.5)
-		
-		
+
+
 		print(p)
 		dev.off()
 
@@ -306,21 +307,21 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 
 	#dir.create(file.path(file.out, 'Isotype_Stacked_Bar'), showWarnings = FALSE)
 	#file.out.isobar <- paste0(file.out, '/Isotype_Stacked_Bar/')
-		
+
 	pdf(paste0(iso.out, subject,'_Isotype_StackedBar.pdf'))
 
-	p <- ggplot() 
+	p <- ggplot()
 	p <- p + geom_bar(data = iso.melt, aes_string(x = 'Population', y = 'Percent', fill = 'Isotype'), stat = "identity", 	position = "stack")
 	p <- p + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 	p <- p + ylab('Percent of Sequences') + xlab('')
 	p <- p + theme(axis.text.x = element_text(size = 14, vjust = .5, angle = 90, hjust = 1), axis.text.y = element_text(size = 12), axis.title = element_text(size = 16), axis.title.y = element_text(vjust = 1.5))
 	p <- p + scale_fill_manual(values = c("#bc5d41", "#84a955", "#965da7"))
-	
+
 	print(p)
 	dev.off()
-	
-	
-	
+
+
+
 #Make Morisita heat Map
 
 
@@ -329,22 +330,22 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 	fi <- numpops + (st - 1)
 	mor.x <- seq.info[,c(1,st:fi)]
 	dm <- melt(mor.x, id.vars = 'Population')
-	
+
 	p <- ggplot(dm, aes(y = Population, x = variable))
 	p <- p + geom_tile(aes(fill=value), colour = 'black') + xlab("") + ylab("") + theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1, size = 9, colour = 'black'), axis.text.y = element_text(size = 9, colour = 'black')) + scale_fill_gradient(low = "white", high = "steelblue")  + geom_text(aes(label = round(value, 2)))
-	
+
 	print(p)
 	dev.off()
-	
+
 # Stacked Barplot
 
 stacked <- function(data, minimum = 0, maximum = 105, pull = 1, border = "grey30"){
 
-# Input data should be a file exported from the combined rearrangements view of 
+# Input data should be a file exported from the combined rearrangements view of
 # Analyzer 3.0.
 # Minimum and maximum alter the scale of the y axis to focus on a certain range of
 # percentages.
-# Pull number gives column that the data is sorted by before aa are pulled from. 
+# Pull number gives column that the data is sorted by before aa are pulled from.
 
 
 
@@ -384,25 +385,25 @@ for(i in 1:length(sampleNames)) {
 # Identify aa's to be colored
 g <- order(df_long$sequences)
 if (pull == 1){
-	colVec <- ifelse(df_long$Lineage == aa1, "red", 
-		ifelse(df_long$Lineage == aa2, "green", 
-		ifelse(df_long$Lineage == aa3, "purple", 
-		ifelse(df_long$Lineage == aa4, "blue", 
-		ifelse(df_long$Lineage == aa5, "yellow", 
-		ifelse(df_long$Lineage == aa6, "coral", 
-		ifelse(df_long$Lineage == aa7, "pink", 
+	colVec <- ifelse(df_long$Lineage == aa1, "red",
+		ifelse(df_long$Lineage == aa2, "green",
+		ifelse(df_long$Lineage == aa3, "purple",
+		ifelse(df_long$Lineage == aa4, "blue",
+		ifelse(df_long$Lineage == aa5, "yellow",
+		ifelse(df_long$Lineage == aa6, "coral",
+		ifelse(df_long$Lineage == aa7, "pink",
 		ifelse(df_long$Lineage == aa8, "navy",
 		ifelse(df_long$Lineage == aa9, "darkgreen",
 		ifelse(df_long$Lineage == aa10, "maroon", "white"))))))))))[g]
 		} else {
 
-	colVec <- ifelse(df_long$Lineage == aa1, "red", 
-		ifelse(df_long$Lineage == aa2, "green", 
-		ifelse(df_long$Lineage == aa3, "purple", 
-		ifelse(df_long$Lineage == aa4, "blue", 
-		ifelse(df_long$Lineage == aa5, "yellow", 
-		ifelse(df_long$Lineage == aa6, "coral", 
-		ifelse(df_long$Lineage == aa7, "pink", 
+	colVec <- ifelse(df_long$Lineage == aa1, "red",
+		ifelse(df_long$Lineage == aa2, "green",
+		ifelse(df_long$Lineage == aa3, "purple",
+		ifelse(df_long$Lineage == aa4, "blue",
+		ifelse(df_long$Lineage == aa5, "yellow",
+		ifelse(df_long$Lineage == aa6, "coral",
+		ifelse(df_long$Lineage == aa7, "pink",
 		ifelse(df_long$Lineage == aa8, "navy",
 		ifelse(df_long$Lineage == aa9, "darkgreen",
 		ifelse(df_long$Lineage == aa10, "maroon", "white"))))))))))[g]
@@ -545,7 +546,7 @@ for (s in 1:numpops){
 		p = p + geom_point(data = df2, aes_string(x='col1', y='col2'), shape = 21, colour = 'black')
 
 		p = p + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5)) 
+		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5))
 		p = p + geom_hline(yintercept = c(line0), linetype = 'dotted', size = 0.75) + geom_vline(xintercept=c(line0), linetype = "dotted", size = 0.75)
 		p = p + scale_x_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
 		p = p + scale_y_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
@@ -588,7 +589,7 @@ for (s in 1:numpops){
 		p = p + geom_point(data = df2, aes_string(x='col1', y='col2'), shape = 21, colour = 'black')
 
 		p = p + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5)) 
+		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5))
 		p = p + geom_hline(yintercept = c(line0), linetype = 'dotted', size = 0.75) + geom_vline(xintercept=c(line0), linetype = "dotted", size = 0.75)
 		p = p + scale_x_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
 		p = p + scale_y_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
@@ -630,7 +631,7 @@ for (s in 1:numpops){
 		p = p + geom_point(data = df2, aes_string(x='col1', y='col2'), shape = 21, colour = 'black')
 
 		p = p + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5)) 
+		p = p + theme(axis.text= element_text(size= 12), axis.title=element_text(size= 12),  axis.title.y = element_text(vjust = 1.05), axis.title.x = element_text(vjust = 0.5))
 		p = p + geom_hline(yintercept = c(line0), linetype = 'dotted', size = 0.75) + geom_vline(xintercept=c(line0), linetype = "dotted", size = 0.75)
 		p = p + scale_x_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
 		p = p + scale_y_log10(breaks = ticks, labels = c(0, ticks[2:length(ticks)]), limits = axisRange)
@@ -643,7 +644,7 @@ for (s in 1:numpops){
 }
 
 	print('Analysis Done')
-	
+
 
 
 #g <- tableGrob(seq.info[c(1, 7:ncol(seq.info))], rows = NULL)
@@ -656,13 +657,3 @@ for (s in 1:numpops){
 	options(warn = oldw)
 
 }
-
-
-
-
-
-
-
-
-
-
