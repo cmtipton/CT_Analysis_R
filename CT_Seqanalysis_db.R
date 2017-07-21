@@ -321,8 +321,7 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 
 	print(p)
 	dev.off()
-
-
+	
 
 #Make Morisita heat Map
 
