@@ -278,6 +278,8 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 		#p <- pie(slices, labels = lbs, col=c("#b0923b", "#8960b3", "#56ae6c", "#ba495b"), cex = 1.5)
 
 
+
+
 		slices <- c(nrow(m), nrow(g), nrow(a))
 		lbs <- c('IgM', 'IgG', 'IgA')
 
