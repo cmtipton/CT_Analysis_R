@@ -232,14 +232,68 @@ df.1792$Subject <- rep('1792')
 df.1809$Subject <- rep('1809')
 
 
-
-
 df <- rbind(df.674, df.1095, df.1417, df.1325)
 df2 <-  rbind(df.1789, df.1792, df.1809)
 
 names(df2) <- names(df)
 df <- rbind(df, df2)
 
+
+
+remove(df.1809)
+remove(df.N.NP.1809)
+remove(df.N.PBL.1809)
+remove(df.ASC.A.1809)
+remove(df.ASC.G.1809)
+remove(df.ASC.E.1809)
+remove(df.SM.NP.1809)
+remove(df.SM.PBL.1809)
+remove(df.1792)
+remove(df.N.NP.1792)
+remove(df.N.PBL.1792)
+remove(df.ASC.A.1792)
+remove(df.ASC.G.1792)
+remove(df.ASC.E.1792)
+remove(df.SM.NP.1792)
+remove(df.SM.PBL.1792)
+remove(df.1789)
+remove((df.N.NP.1789)
+remove(df.N.PBL.1789)
+remove(df.ASC.A.1789)
+remove(df.ASC.G.1789)
+remove(df.ASC.E.1789)
+remove(df.SM.NP.1789)
+remove(df.SM.PBL.1789)
+remove(df.1325)
+remove(df.N.NP.1325)
+remove(df.N.PBL.1325)
+remove(df.POP3.A.1325)
+remove(df.POP3.G.1325)
+remove(df.POP3.E.1325)
+remove(df.SM.PBL.1325)
+remove(df.1417)
+remove(df.N.NP.1417)
+remove(df.N.PBL.1417)
+remove(df.POP3.A.1417)
+remove(df.POP3.G.1417)
+remove(df.POP3.E.1417)
+remove(df.SM.NP.1417)
+remove(df.SM.PBL.1417)
+remove(df.674)
+remove(df.N.NP.674)
+remove(df.N.PBL.674)
+remove(df.POP3.A.674)
+remove(df.POP3.G.674)
+remove(df.POP3.E.674)
+remove(df.SM.NP.674)
+remove(df.SM.PBL.674)
+remove(df.1095)
+remove(df.N.NP.1095)
+remove(df.N.PBL.1095)
+remove(df.POP3.A.1095)
+remove(df.POP3.G.1095)
+remove(df.POP3.E.1095)
+remove(df.SM.PBL.1095)
 
 
 df$Mutation_Rate <- df$Vquest_8_V.REGION.Nb.of.mutations/df$Vquest_8_V.REGION.Nb.of.nucleotides *
@@ -266,3 +320,17 @@ g + facet_grid(Population ~ .) + theme(axis.text.x = element_text(size = 18), ax
     axis.title = element_text(size = 20), axis.title.y = element_text(vjust = 1.5),
     panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.text.y = element_text(size = 16,
         angle = 0)) + scale_fill_manual(values = getPalette) + scale_color_manual(values = getPalette)
+
+
+
+#BubblePlot
+
+g + geom_count(show.legend=F) + geom_boxplot(show.legend=F, fill = 'transparent', color = 'grey50', alpha = .5) + facet_grid(Subject~.) + scale_y_continuous(limits = c(0,35))
+
+
+#Boxplot
+g <- ggplot(df, aes(y = Mutation_Rate, x = Population, fill = Subject))
+g + geom_boxplot(color = 'grey50', outlier.shape = NA) + scale_y_continuous(limits = c(0,35)) + theme_bw() + theme(axis.text.x = element_text(size = 18), axis.text.y = element_text(size = 14),
+                                                                                                                   axis.title = element_text(size = 20), axis.title.y = element_text(vjust = 1.5),
+                                                                                                                   panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.text.y = element_text(size = 16,
+                                                                                                                                                                                                                       angle = 0)) + scale_fill_economist()
