@@ -125,6 +125,20 @@ cor_pmat <- function(x, ...) {
     p.mat
 }
 
+#+++++++++++++++++++++++
+# Helper Functions
+#+++++++++++++++++++++++
+
+# Get lower triangle of the correlation matrix
+.get_lower_tri <- function(cormat, show.diag = FALSE) {
+  if (is.null(cormat))
+    return(cormat)
+  cormat[upper.tri(cormat)] <- NA
+  if (!show.diag)
+    diag(cormat) <- NA
+  return(cormat)
+}
+
 # Get upper triangle of the correlation matrix
 .get_upper_tri <- function(cormat, show.diag = FALSE) {
   if (is.null(cormat))
