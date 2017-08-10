@@ -125,8 +125,46 @@ cor_pmat <- function(x, ...) {
     p.mat
 }
 
+#+++++++++++++++++++++++
+# Helper Functions
+#+++++++++++++++++++++++
 
-ggcorrplot(df2, hc.order = TRUE,
+# Get lower triangle of the correlation matrix
+.get_lower_tri <- function(cormat, show.diag = FALSE) {
+  if (is.null(cormat))
+    return(cormat)
+  cormat[upper.tri(cormat)] <- NA
+  if (!show.diag)
+    diag(cormat) <- NA
+  return(cormat)
+}
+
+# Get upper triangle of the correlation matrix
+.get_upper_tri <- function(cormat, show.diag = FALSE) {
+  if (is.null(cormat))
+    return(cormat)
+  cormat[lower.tri(cormat)] <- NA
+  if (!show.diag)
+    diag(cormat) <- NA
+  return(cormat)
+}
+
+# hc.order correlation matrix
+.hc_cormat_order <- function(cormat, hc.method = "complete") {
+  dd <- stats::as.dist((1 - cormat) / 2)
+  hc <- stats::hclust(dd, method = hc.method)
+  hc$order
+}
+
+.no_panel <- function() {
+  ggplot2::theme(
+    axis.title.x = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_blank()
+  )
+}
+
+
+ggcorrplot(df, hc.order = TRUE,
            type = "lower",
            lab = TRUE,
            lab_size = 3,
