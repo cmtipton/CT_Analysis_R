@@ -1,14 +1,17 @@
 #location input requires file location of the grouped lineage file from IgSeq
+#location input requires file location of the grouped lineage file from IgSeq
 
 	seqanalysis <- function(location){
 	library(RColorBrewer)
 	library(ggplot2)
 	library(dplyr)
+	library(plyr)
 	library(data.table)
-	library(reshape)
+	#library(reshape)
 	library(reshape2)
 	library(spaa)
 	library(RSQLite)
+	library(stringr)
 
 #function to load SQLite db file
 
@@ -20,70 +23,92 @@
 	db <- dbConnect(sqlite.driver,
                 dbname = filename)
 
-	mytable <<- dbReadTable(db, 'sequence')
+	df <<- dbReadTable(db, 'sequence')
 	}
+
+
+#establish input and output file locations
+
+location <- '~/Desktop/Test'
+
+	location2 <- location
+	location <- paste0(location, '/IgSeq')
+	#file.dir <- paste0(location, '/lineageOutput/withIdenticals/')
+	#file.x <<- paste0(file.dir, 'GROUPED_LINEAGE_COUNTS.txt')
+	file.out <- paste0(location, '/CT_Sequencing_Analysis/')
+	master.out <- paste0(file.out, 'MasterData_', sub(".*/", "", location2), '.txt')
+	dir.create(file.path(location, '/CT_Sequencing_Analysis'), showWarnings = FALSE)
+	subject <- sub(".*/", "", location2)
+	dblocation <- list.files(location, pattern = "\\.db$")
+	dbfile <- paste0(location, "/", dblocation[1])
+	print("Loading database file...")
+	loadsql(dbfile)
+
+#Add columns of info
+config.location <- list.files(location2, pattern = "config")
+config.file <- paste0(location2, "/", config.location[1])
+config.info <- read.csv(config.file, sep = '\t', header = TRUE)
+time.course <- config.info$Time_Course[1]
+
+
+df$Population <- sub(".*_", "", df$population)
+df$Tissue <- str_match(df$population, "_(.*?)_")[,2]
+
+if (length(levels(factor(df$Tissue))) != 1){
+	df$Population <- paste0(df$Tissue, "_", df$Population)
+	}
+if (time.course == 'Y'){
+	df$Population <- sub(".*x", "", df$population)
+	}
+df$Pop <- sub(".*_", "", df$population)
+df$Subject <- sub("_.*", "", df$population)
+is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+df$Singleton <- !is.wholenumber(df$lineageID)
 
 
 
 #get rid of warnings because of data.table call
 
-	oldw <- getOption("warn")
-	options(warn = -1)
+#	oldw <- getOption("warn")
+#	options(warn = -1)
 
-#establish input and output file locations
-
-
-location <- '/Users/cmtipto/Desktop/Test'
-
-
-	location2 <- location
-	location <- paste0(location, '/IgSeq')
-	file.dir <- paste0(location, '/lineageOutput/withIdenticals/')
-	file.x <<- paste0(file.dir, 'GROUPED_LINEAGE_COUNTS.txt')
-	file.out <- paste0(location, '/CT_Sequencing_Analysis/')
-	file.y <- paste0(file.out, 'MasterData_', sub(".*/", "", location2), '.txt')
-	dir.create(file.path(location, '/CT_Sequencing_Analysis'), showWarnings = FALSE)
-	subject <- sub(".*/", "", location2)
-	dblocation <- list.files(location2, pattern = "\\.db$")
-	dbfile <- paste0(location2, "/", dblocation[1])
-	loadsql(dbfile)
 
 
 #establish function to change column names of grouped lineage file
 
-	changelin <- function(loc){
-
-		data <-read.table(loc, sep="\t", header=TRUE)
-		print(paste0('Reading: ', loc))
-		colnames(data)[1:4] <- c('Lineage', 'IGHV', 'Pops', 'Seqs')
-		for (i in 5:ncol(data)){
-			colnames(data)[i] <- substr(colnames(data)[i], 21, nchar(colnames(data)[i]))
-			}
-		data.x <<- data
-	}
+#	changelin <- function(loc){
+#
+#		data <-read.table(loc, sep="\t", header=TRUE)
+#		print(paste0('Reading: ', loc))
+#		colnames(data)[1:4] <- c('Lineage', 'IGHV', 'Pops', 'Seqs')
+#		for (i in 5:ncol(data)){
+#			colnames(data)[i] <- substr(colnames(data)[i], 21, nchar(colnames(data)[i]))
+#			}
+#		lineages.union <<- data
+#	}
 
 #call function to change column names in the specified file
-
-	changelin(file.x)
+#changelin(file.x)
 
 
 
 #determine number of populations
-	poplist <- levels(as.factor(mytable$population))
-	numpops <- length(pops)
-	print(paste0('Analyzing: ', numpops, ' populations of cells:'))
+	poplist <- levels(as.factor(df$Population))
+	numpops <- length(poplist)
+	print(paste0('Analyzing ', numpops, ' populations of cells:'))
+	poplist
 
 
-	poplist <- list()
-
-	for (p in 1:numpops){
-		file.merged <- paste0(location, '/mergeOutput')
-		file.merged.list <- list.dirs(file.merged)
-		j <- sub(".*/", "", file.merged.list[p+1])
-		#jx <- sub("Run[0-9][0-9]_", "", j)
-		jy <- sub("_S[0-9]+", "", j)
-		poplist[p] <- jy
-		}
+#	poplist <- list()
+#
+#	for (p in 1:numpops){
+#		file.merged <- paste0(location, '/mergeOutput')
+#		file.merged.list <- list.dirs(file.merged)
+#		j <- sub(".*/", "", file.merged.list[p+1])
+#		#jx <- sub("Run[0-9][0-9]_", "", j)
+#		jy <- sub("_S[0-9]+", "", j)
+#		poplist[p] <- jy
+#		}
 
 
 
@@ -91,46 +116,52 @@ location <- '/Users/cmtipto/Desktop/Test'
 
 #make data frame that will hold population names and info
 
-	seq.info <- data.frame()
-	seqlin <- data.frame()
-
-	for (j in 1:numpops){
-		seq.info[j,1] <- poplist[j]
-		}
-	colnames(seq.info) <- c('Population')
-
+#	master.data <- data.frame()
+#	seqlin <- data.frame()
+#
+#	for (j in 1:numpops){
+#		master.data[j,1] <- poplist[j]
+#		}
+#	colnames(master.data) <- c('Population')
+#	master.data
 
 
 #Make Grouped Lineage Data Frame
 
 
-value <-  as.numeric( as.character(mytable$lineageID) ) # get the numbers
-noninteger <- value %% 1 != 0   # see if there's a fractional part
-noninteger <- noninteger | is.na(noninteger)  # get rid of the NA's
-non.single <- mytable[!noninteger,]
-lineage.data <- non.single[,c('population', 'lineageID', 'Vgene')]
-table.x <- table(lineage.data$lineage, lineage.data$population)
-data.x <- as.data.frame.matrix(y)
+non.single <- df[df$Singleton == FALSE,]
+lineage.data <- non.single[,c('Population', 'lineageID', 'Vgene')]
+table.x <- table(lineage.data$lineageID, lineage.data$Population)
+lineages.union <- as.data.frame.matrix(table.x)
 
 
+melt.x <- melt(lineages.union)
+filtered.melt.x <- melt.x[melt.x$value != 0,]
+lineage.table <- table(filtered.melt.x$variable)
+melt.lineage.table <- as.data.frame(melt(lineage.table))
+colnames(melt.lineage.table)[2] <- 'Lineages'
+
+vgene.table <- table(df$Population, df$Vgene)
+vgene.perc <- prop.table(vgene.table) * 100
 
 
+seqs <- as.data.frame(table(df$Population))
+master.data <- cbind(seqs, melt.lineage.table$Lineages)
+
+colnames(master.data) <- c('Population', 'Sequences', 'Lineages')
 
 
+if (length(levels(factor(df$Tissue))) != 1){
+	master.data$Tissue <- sub("_.*", "", master.data$Population)
+	} else {
+	master.data$Tissue <- "Unknown"
+	}
 
+if (time.course == 'Y'){
+	master.data$Tissue <- str_match(master.data$Population, "_(.*?)_")[,2]
+	}
 
-
-	for (i in 1:numpops){
-		df.filtered <- filter(data.x, data.x[[i+4]] > 0)
-		lin.filtered <- nrow(df.filtered)
-		seqlin[i,1] <- sum(df.filtered[,i+4])
-		seqlin[i,2] <- lin.filtered
-		colnames(seqlin)[1] <- 'Sequences'
-		colnames(seqlin)[2] <- 'Lineages'
-		}
-
-	seq.info <- cbind(seq.info, seqlin)
-	print(seq.info)
+	print(master.data)
 
 #establish function to calculate clonality based on the Shannon diversity index (1 - Pielou's Evenness)
 
@@ -145,14 +176,107 @@ data.x <- as.data.frame.matrix(y)
 #Add clonality values for each population into a new column
 
 
-	clonality.df <<- data.frame()
+	clonality.df <- data.frame()
 
 	for (k in 1:numpops){
-		clonality.df[k, 1] <<- clon(data.x, col = k + 4)
+		clonality.df[k, 1] <- clon(lineages.union, col = k)
 		}
 
-	seq.info <- cbind(seq.info, clonality.df)
-	colnames(seq.info)[1:4] <- c('Population', 'Sequences', 'Lineages', 'Clonality')
+	master.data <- cbind(master.data, clonality.df)
+	colnames(master.data)[5] <- 'Clonality'
+
+df$Mutation_Rate <- df$V_Mutations/df$V_Nucleotides * 100
+master.data$Mutation_Rate_Mean <- ddply(df, .(Population), summarize, mean=mean(Mutation_Rate))[,2]
+master.data$Mutation_Rate_Median <- ddply(df, .(Population), summarize, median=median(Mutation_Rate))[,2]
+
+
+
+
+iso.info <- data.frame()
+
+for (n in 1:numpops){
+		Ig <- df[df$isotype != 'U',]
+		IgG <- df[df$isotype == 'G',]
+		IgA <- df[df$isotype == 'A',]
+		IgM <- df[df$isotype == 'M',]
+		IgE <- df[df$isotype == 'E',]
+		IgU <- df[df$isotype == 'U',]
+		Ig <- Ig[Ig$Population == poplist[n],]
+		IgG <- IgG[IgG$Population == poplist[n],]
+		IgA <- IgA[IgA$Population == poplist[n],]
+		IgM <- IgM[IgM$Population == poplist[n],]
+		IgE <- IgE[IgE$Population == poplist[n],]
+		IgU <- IgU[IgU$Population == poplist[n],]
+		iso.info[n, 1] <- nrow(IgM)
+		iso.info[n, 2] <- nrow(IgG)
+		iso.info[n, 3] <- nrow(IgA)
+		iso.info[n, 4] <- nrow(IgE)
+		iso.info[n, 5] <- nrow(IgU)
+		iso.info[n, 6] <- round((nrow(IgM)/nrow(Ig) * 100), 2)
+		iso.info[n, 7] <- round((nrow(IgG)/nrow(Ig) * 100), 2)
+		iso.info[n, 8] <- round((nrow(IgA)/nrow(Ig) * 100), 2)
+		iso.info[n, 9] <- round((nrow(IgE)/nrow(Ig) * 100), 2)
+		iso.info[n, 10] <- round((nrow(IgU)/nrow(df) * 100), 2)
+		iso.info[n, 11] <- round(mean(IgM$V_Mutations), 2)
+		iso.info[n, 12] <- round(mean(IgG$V_Mutations), 2)
+		iso.info[n, 13] <- round(mean(IgA$V_Mutations), 2)
+		iso.info[n, 14] <- round(mean(IgE$V_Mutations), 2)
+		iso.info[n, 15] <- round(mean(IgU$V_Mutations), 2)
+		iso.info[n, 16] <- round(median(IgM$V_Mutations), 2)
+		iso.info[n, 17] <- round(median(IgG$V_Mutations), 2)
+		iso.info[n, 18] <- round(median(IgA$V_Mutations), 2)
+		iso.info[n, 19] <- round(median(IgE$V_Mutations), 2)
+		iso.info[n, 20] <- round(median(IgU$V_Mutations), 2)
+		iso.info[n, 21] <- round(mean(IgM$Mutation_Rate), 2)
+		iso.info[n, 22] <- round(mean(IgG$Mutation_Rate), 2)
+		iso.info[n, 23] <- round(mean(IgA$Mutation_Rate), 2)
+		iso.info[n, 24] <- round(mean(IgE$Mutation_Rate), 2)
+		iso.info[n, 25] <- round(mean(IgU$Mutation_Rate), 2)
+		iso.info[n, 26] <- round(median(IgM$Mutation_Rate), 2)
+		iso.info[n, 27] <- round(median(IgG$Mutation_Rate), 2)
+		iso.info[n, 28] <- round(median(IgA$Mutation_Rate), 2)
+		iso.info[n, 29] <- round(median(IgE$Mutation_Rate), 2)
+		iso.info[n, 30] <- round(median(IgU$Mutation_Rate), 2)
+}
+
+colnames(iso.info) <- c('IgM Sequences', 'IgG Sequences', 'IgA Sequences', 'IgE Sequences', 'Unknown Isotype Sequences', 'Percent IgM', 'Percent IgG', 'Percent IgA', 'Percent IgE', 'Percent Unknown Isotype', 'IgM Mutations (Mean)', 'IgG Mutations (Mean)', 'IgA Mutations (Mean)', 'IgE Mutations (Mean)', 'Unknown Isotype Mutations (Mean)', 'IgM Mutations (Median)', 'IgG Mutations (Median)', 'IgA Mutations (Median)', 'IgE Mutations (Median)', 'Unknown Isotype Mutations (Median)', 'IgM Mutation Rate (Mean)', 'IgG Mutation Rate (Mean)', 'IgA Mutation Rate (Mean)', 'IgE Mutation Rate (Mean)', 'Unknown Isotype Mutation Rate (Mean)', 'IgM Mutation Rate (Median)', 'IgG Mutation Rate (Median)', 'IgA Mutation Rate (Median)', 'IgE Mutation Rate (Median)', 'Unknown Isotype Mutation Rate (Median)')
+
+master.data <- cbind(master.data, iso.info)
+
+
+master.data$Disease <- config.info$Disease[1]
+master.data$Vaccine <- config.info$Vaccine[1]
+master.data$Vaccine_Time <- config.info$Vaccine_Time[1]
+
+
+vgene.table <- table(df$Population, df$Vgene)
+vgene.perc <- prop.table(vgene.table) * 100
+
+master.data$IGHV4_34 <- vgene.perc[,'IGHV4-34']
+V434 <- df[df$Vgene == 'IGHV4-34',]
+
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+
+V434$AVY <- substrRight(V434$AA_FR1, 3)
+AVY.table <- table(V434$Population, V434$AVY)
+master.data$AVY_perc <- AVY.table[,'AVY']/rowSums(AVY.table) * 100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -161,7 +285,7 @@ data.x <- as.data.frame.matrix(y)
 	percof.df <- data.frame()
 
 	for (m in 1:numpops){
-		df.x <- filter(data.x, data.x[[m+4]] > 0)
+		df.x <- filter(lineages.union, lineages.union[[m+4]] > 0)
 		lin.x <- nrow(df.x)
 		for (n in 1:numpops){
 			df.x_y <- filter(df.x, df.x[[n+4]] > 0)
@@ -169,7 +293,7 @@ data.x <- as.data.frame.matrix(y)
 			perc.x_y <- lin.x_y/lin.x * 100
 			percof.df[m,n] <- round(perc.x_y,2)
 			}
-		colnames(percof.df)[m] <- colnames(data.x)[m+4]
+		colnames(percof.df)[m] <- colnames(lineages.union)[m+4]
 		}
 
 #rename columns
@@ -178,12 +302,12 @@ data.x <- as.data.frame.matrix(y)
 		}
 
 
-	seq.info <- cbind(seq.info, percof.df)
+	master.data <- cbind(master.data, percof.df)
 
 
 #Calculate the Morisita index for each pair of samples into a new matrix
 
-	pops.df <- data.x[,5:ncol(data.x)]
+	pops.df <- lineages.union[,5:ncol(lineages.union)]
 	mor <- niche.overlap(pops.df, method = c('morisita'))
 	mor.mat <- as.matrix(round(mor,3))
 	for (i in 1:numpops){
@@ -199,9 +323,9 @@ data.x <- as.data.frame.matrix(y)
 
 
 
-#Add Morisita index values to seq.info data frame
+#Add Morisita index values to master.data data frame
 
-	seq.info <- cbind(seq.info, mor.mat)
+	master.data <- cbind(master.data, mor.mat)
 
 
 
@@ -278,8 +402,6 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 		#p <- pie(slices, labels = lbs, col=c("#b0923b", "#8960b3", "#56ae6c", "#ba495b"), cex = 1.5)
 
 
-
-
 		slices <- c(nrow(m), nrow(g), nrow(a))
 		lbs <- c('IgM', 'IgG', 'IgA')
 
@@ -294,13 +416,13 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 
 		colnames(iso.info) <- c('IgM Sequences', 'IgG Sequences', 'IgA Sequences', 'IgE Sequences', 'Unknown Isotype Sequences', 'Percent IgM', 'Percent IgG', 'Percent IgA', 'Percent IgE', 'Percent Unknown Isotype', 'IgM Mutations (Mean)', 'IgG Mutations (Mean)', 'IgA Mutations (Mean)', 'IgE Mutations (Mean)', 'Unknown Isotype Mutations (Mean)', 'IgM Mutations (Median)', 'IgG Mutations (Median)', 'IgA Mutations (Median)', 'IgE Mutations (Median)', 'Unknown Isotype Mutations (Median)', 'IgM Mutation Rate (Mean)', 'IgG Mutation Rate (Mean)', 'IgA Mutation Rate (Mean)', 'IgE Mutation Rate (Mean)', 'Unknown Isotype Mutation Rate (Mean)', 'IgM Mutation Rate (Median)', 'IgG Mutation Rate (Median)', 'IgA Mutation Rate (Median)', 'IgE Mutation Rate (Median)', 'Unknown Isotype Mutation Rate (Median)')
 
-	seq.info <- cbind(seq.info, iso.info)
+	master.data <- cbind(master.data, iso.info)
 
 
 
 #Make Isotype Bar Chart
 
-	df.iso <- seq.info[,c('Population', 'Percent IgM', 'Percent IgG', 'Percent IgA')]
+	df.iso <- master.data[,c('Population', 'Percent IgM', 'Percent IgG', 'Percent IgA')]
 	colnames(df.iso) <- c('Population', 'IgM', 'IgG', 'IgA')
 	iso.melt <- melt(df.iso)
 
@@ -321,7 +443,8 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 
 	print(p)
 	dev.off()
-	
+
+
 
 #Make Morisita heat Map
 
@@ -329,7 +452,7 @@ out.isopie <- paste0(iso.out, '/Isotype_Pie_Charts/')
 	pdf(paste0(file.out, subject,'_Morisita_Heatmap.pdf'))
 	st <- numpops + 5
 	fi <- numpops + (st - 1)
-	mor.x <- seq.info[,c(1,st:fi)]
+	mor.x <- master.data[,c(1,st:fi)]
 	dm <- melt(mor.x, id.vars = 'Population')
 
 	p <- ggplot(dm, aes(y = Population, x = variable))
@@ -429,7 +552,7 @@ for (n in 5:(4+numpops)){
 c <- (n - 4)
 pdf(paste0(stacked.out, subject,'_pull-Pop-',c,'_Clone_StackedBar.pdf'))
 
-p <- stacked(data.x, pull = (n))
+p <- stacked(lineages.union, pull = (n))
 
 print(p)
 dev.off()
@@ -437,19 +560,19 @@ dev.off()
 
 pdf(paste0(stacked.out, subject,'_noPull_Clone_StackedBar.pdf'))
 
-p <- stacked(data.x)
+p <- stacked(lineages.union)
 
 print(p)
 dev.off()
 
-#return seq.info
-write.table(seq.info, file = file.y, quote = FALSE, sep = "\t", row.names = FALSE)
+#return master.data
+write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
 
 
 pdf(paste0(file.out, subject,'_Clonality.pdf'))
 
 p = ggplot()
-p = p + geom_bar(data = seq.info, aes_string(x = 'Population', y = 'Clonality'), stat = "identity")
+p = p + geom_bar(data = master.data, aes_string(x = 'Population', y = 'Clonality'), stat = "identity")
 p = p + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p = p + scale_x_discrete(name = "") + scale_y_continuous(name = "Clonality")
 p = p + theme(axis.text.x = element_text(angle = 90, size = 14, vjust = .5), axis.text.y = element_text(size = 12), axis.title = element_text(size = 16), axis.title.y = element_text(vjust = 1.5))
@@ -462,7 +585,7 @@ dir.create(file.path(location, '/CT_Sequencing_Analysis/MutationInfo/'), showWar
 
 mut.out <- paste0(file.out, 'MutationInfo/')
 
-master.data <- read.table(file.y, sep="\t", header=TRUE)
+master.data <- read.table(master.out, sep="\t", header=TRUE)
 
 pdf(paste0(mut.out, subject,'_median_IgM_Mutation_rate.pdf'))
 
@@ -519,7 +642,7 @@ dir.create(file.path(location, '/CT_Sequencing_Analysis/ComparePops/'), showWarn
 compare.out <- paste0(file.out, 'ComparePops/')
 
 
-df.x <- data.x[,5:(numpops + 4)]
+df.x <- lineages.union[,5:(numpops + 4)]
 df.y <- prop.table(as.matrix(df.x),2)
 df.z <- as.data.frame(df.y)
 
@@ -648,7 +771,7 @@ for (s in 1:numpops){
 
 
 
-#g <- tableGrob(seq.info[c(1, 7:ncol(seq.info))], rows = NULL)
+#g <- tableGrob(master.data[c(1, 7:ncol(master.data))], rows = NULL)
 #g <- gtable_add_grob(g,
 #                     grobs = rectGrob(gp = gpar(fill = NA, lwd = 2)),
 #                     t = 1, b = nrow(g), l = 1, r = ncol(g))
