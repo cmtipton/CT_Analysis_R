@@ -21,13 +21,13 @@ seqanalysis <- function(location) {
         sqlite.driver <- dbDriver("SQLite")
         db <- dbConnect(sqlite.driver, dbname = filename)
 
-        df <<- dbReadTable(db, "sequence")
+        full.data <<- dbReadTable(db, "sequence")
     }
 
 
     # establish input and output file locations
 
-    location <- "~/Desktop/Test"
+    location <- "/Users/cmtipto/Desktop/Test"
 
     location2 <- location
     location <- paste0(location, "/IgSeq")
@@ -43,26 +43,26 @@ seqanalysis <- function(location) {
     loadsql(dbfile)
 
     # Add columns of info
-    config.location <- list.files(location2, pattern = "config")
-    config.file <- paste0(location2, "/", config.location[1])
-    config.info <- read.csv(config.file, sep = "\t", header = TRUE)
-    time.course <- config.info$Time_Course[1]
+    #config.location <- list.files(location2, pattern = "config")
+    #config.file <- paste0(location2, "/", config.location[1])
+    #config.info <- read.csv(config.file, sep = "\t", header = TRUE)
+    #time.course <- config.info$Time_Course[1]
 
 
-    df$Population <- sub(".*_", "", df$population)
-    df$Tissue <- str_match(df$population, "_(.*?)_")[, 2]
+    full.data$Population <- sub(".*_", "", full.data$population)
+    full.data$Tissue <- str_match(full.data$population, "_(.*?)_")[, 2]
 
-    if (length(levels(factor(df$Tissue))) != 1) {
-        df$Population <- paste0(df$Tissue, "_", df$Population)
+    if (length(levels(factor(full.data$Tissue))) != 1) {
+        full.data$Population <- paste0(full.data$Tissue, "_", full.data$Population)
     }
-    if (time.course == "Y") {
-        df$Population <- sub(".*x", "", df$population)
-    }
-    df$Pop <- sub(".*_", "", df$population)
-    df$Subject <- sub("_.*", "", df$population)
+    #if (time.course == "Y") {
+    #    full.data$Population <- sub(".*x", "", full.data$population)
+    #}
+    full.data$Pop <- sub(".*_", "", full.data$population)
+    full.data$Subject <- sub("_.*", "", full.data$population)
     is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) abs(x - round(x)) <
         tol
-    df$Singleton <- !is.wholenumber(df$lineageID)
+    full.data$Singleton <- !is.wholenumber(full.data$lineageID)
 
 
 
@@ -85,7 +85,7 @@ seqanalysis <- function(location) {
 
 
     # determine number of populations
-    poplist <- levels(as.factor(df$Population))
+    poplist <- levels(as.factor(full.data$Population))
     numpops <- length(poplist)
     print(paste0("Analyzing ", numpops, " populations of cells:"))
     poplist
@@ -110,7 +110,7 @@ seqanalysis <- function(location) {
     # Make Grouped Lineage Data Frame
 
 
-    non.single <- df[df$Singleton == FALSE, ]
+    non.single <- full.data[full.data$Singleton == FALSE, ]
     lineage.data <- non.single[, c("Population", "lineageID", "Vgene")]
     table.x <- table(lineage.data$lineageID, lineage.data$Population)
     lineages.union <- as.data.frame.matrix(table.x)
@@ -122,17 +122,19 @@ seqanalysis <- function(location) {
     melt.lineage.table <- as.data.frame(melt(lineage.table))
     colnames(melt.lineage.table)[2] <- "Lineages"
 
-    vgene.table <- table(df$Population, df$Vgene)
-    vgene.perc <- prop.table(vgene.table) * 100
+    vtable <- table(full.data$Population, full.data$Vgene)
+    vperc <- prop.table(vtable) * 100
 
+    jtable <- table(full.data$Population, full.data$JGene)
+    jperc <- prop.table(jtable) * 100
 
-    seqs <- as.data.frame(table(df$Population))
+    seqs <- as.data.frame(table(full.data$Population))
     master.data <- cbind(seqs, melt.lineage.table$Lineages)
 
     colnames(master.data) <- c("Population", "Sequences", "Lineages")
 
 
-    if (length(levels(factor(df$Tissue))) != 1) {
+    if (length(levels(factor(full.data$Tissue))) != 1) {
         master.data$Tissue <- sub("_.*", "", master.data$Population)
     } else {
         master.data$Tissue <- "Unknown"
@@ -167,10 +169,10 @@ seqanalysis <- function(location) {
     master.data <- cbind(master.data, clonality.df)
     colnames(master.data)[5] <- "Clonality"
 
-    df$Mutation_Rate <- df$V_Mutations/df$V_Nucleotides * 100
-    master.data$Mutation_Rate_Mean <- ddply(df, .(Population), summarize, mean = mean(Mutation_Rate))[,
+    full.data$Mutation_Rate <- full.data$V_Mutations/full.data$V_Nucleotides * 100
+    master.data$Mutation_Rate_Mean <- ddply(full.data, .(Population), summarize, mean = mean(Mutation_Rate))[,
         2]
-    master.data$Mutation_Rate_Median <- ddply(df, .(Population), summarize, median = median(Mutation_Rate))[,
+    master.data$Mutation_Rate_Median <- ddply(full.data, .(Population), summarize, median = median(Mutation_Rate))[,
         2]
 
 
@@ -179,12 +181,12 @@ seqanalysis <- function(location) {
     iso.info <- data.frame()
 
     for (n in 1:numpops) {
-        Ig <- df[df$isotype != "U", ]
-        IgG <- df[df$isotype == "G", ]
-        IgA <- df[df$isotype == "A", ]
-        IgM <- df[df$isotype == "M", ]
-        IgE <- df[df$isotype == "E", ]
-        IgU <- df[df$isotype == "U", ]
+        Ig <- full.data[full.data$isotype != "U", ]
+        IgG <- full.data[full.data$isotype == "G", ]
+        IgA <- full.data[full.data$isotype == "A", ]
+        IgM <- full.data[full.data$isotype == "M", ]
+        IgE <- full.data[full.data$isotype == "E", ]
+        IgU <- full.data[full.data$isotype == "U", ]
         Ig <- Ig[Ig$Population == poplist[n], ]
         IgG <- IgG[IgG$Population == poplist[n], ]
         IgA <- IgA[IgA$Population == poplist[n], ]
@@ -200,7 +202,7 @@ seqanalysis <- function(location) {
         iso.info[n, 7] <- round((nrow(IgG)/nrow(Ig) * 100), 2)
         iso.info[n, 8] <- round((nrow(IgA)/nrow(Ig) * 100), 2)
         iso.info[n, 9] <- round((nrow(IgE)/nrow(Ig) * 100), 2)
-        iso.info[n, 10] <- round((nrow(IgU)/nrow(df) * 100), 2)
+        iso.info[n, 10] <- round((nrow(IgU)/nrow(full.data) * 100), 2)
         iso.info[n, 11] <- round(mean(IgM$V_Mutations), 2)
         iso.info[n, 12] <- round(mean(IgG$V_Mutations), 2)
         iso.info[n, 13] <- round(mean(IgA$V_Mutations), 2)
@@ -236,16 +238,16 @@ seqanalysis <- function(location) {
     master.data <- cbind(master.data, iso.info)
 
 
-    master.data$Disease <- config.info$Disease[1]
-    master.data$Vaccine <- config.info$Vaccine[1]
-    master.data$Vaccine_Time <- config.info$Vaccine_Time[1]
+    #master.data$Disease <- config.info$Disease[1]
+    #master.data$Vaccine <- config.info$Vaccine[1]
+    #master.data$Vaccine_Time <- config.info$Vaccine_Time[1]
 
 
-    vgene.table <- table(df$Population, df$Vgene)
+    vgene.table <- table(full.data$Population, full.data$Vgene)
     vgene.perc <- prop.table(vgene.table) * 100
 
     master.data$IGHV4_34 <- vgene.perc[, "IGHV4-34"]
-    V434 <- df[df$Vgene == "IGHV4-34", ]
+    V434 <- full.data[full.data$Vgene == "IGHV4-34", ]
 
     substrRight <- function(x, n) {
         substr(x, nchar(x) - n + 1, nchar(x))
@@ -283,7 +285,7 @@ seqanalysis <- function(location) {
             df.x_y <- filter(df.x, df.x[[n + 4]] > 0)
             lin.x_y <- nrow(df.x_y)
             perc.x_y <- lin.x_y/lin.x * 100
-            percof.df[m, n] <- round(perc.x_y, 2)
+            percof.full.data[m, n] <- round(perc.x_y, 2)
         }
         colnames(percof.df)[m] <- colnames(lineages.union)[m + 4]
     }
@@ -503,7 +505,7 @@ seqanalysis <- function(location) {
         # Isolate data needed by removing the sum and present in columns
         df <- data[, c(1, 5:ncol(data))]
 
-        df$Lineage <- factor(df$Lineage)
+        full.data$Lineage <- factor(full.data$Lineage)
 
         # Change the data frame to long form
         df_long <- gather(df, sample, sequences, 2:ncol(df))
