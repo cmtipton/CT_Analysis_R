@@ -24,11 +24,8 @@ seqanalysis <- function(location) {
         full.data <<- dbReadTable(db, "sequence")
     }
 
-
     # establish input and output file locations
-
-    location <- "/Users/cmtipto/Desktop/Test"
-
+    location <- '/Users/cmtipto/Desktop/test/111under'
     location2 <- location
     location <- paste0(location, "/IgSeq")
     # file.dir <- paste0(location, '/lineageOutput/withIdenticals/') file.x <<-
@@ -39,7 +36,8 @@ seqanalysis <- function(location) {
     subject <- sub(".*/", "", location2)
     dblocation <- list.files(location, pattern = "\\.db$")
     dbfile <- paste0(location, "/", dblocation[1])
-    print("Loading database file...")
+    loading <- paste0("Loading database file for subject ", subject, "...")
+    print(loading)
     loadsql(dbfile)
 
     # Add columns of info
@@ -47,19 +45,50 @@ seqanalysis <- function(location) {
     #config.file <- paste0(location2, "/", config.location[1])
     #config.info <- read.csv(config.file, sep = "\t", header = TRUE)
     #time.course <- config.info$Time_Course[1]
+    under <- str_count(full.data$population[1],"\\_")
+    dash <- str_count(full.data$population[1],"\\-")
+    nolane <- str_count(full.data$population[1],"\\_S[0-9]")
 
-
-    full.data$Population <- sub(".*_", "", full.data$population)
-    full.data$Tissue <- str_match(full.data$population, "_(.*?)_")[, 2]
-
-    if (length(levels(factor(full.data$Tissue))) != 1) {
-        full.data$Population <- paste0(full.data$Tissue, "_", full.data$Population)
+    if (under == 4){
+        sample.info <- str_split_fixed(full.data$population, "_", 5)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
+    } else if (dash == 4) {
+        sample.info <- str_split_fixed(full.data$population, "-", 5)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
+    } else if (nolane == 1 & under == 3) {
+        sample.info <- str_split_fixed(full.data$population, "_", 4)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    } else if (nolane == 0 & dash == 3) {
+        print('Error: No lane detected')
+        sample.info <- str_split_fixed(full.data$population, "_", 4)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    } else if (nolane == 0 & under == 3) {
+        print('Error: No lane detected')
+        sample.info <- str_split_fixed(full.data$population, "_", 4)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    } else {
+        print('Error with input nomenclature')
+        sample.info <- str_split_fixed(full.data$population, "_", 4)
+        sample.info <- as.data.frame(sample.info)
+        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
     }
+
+    #full.data$Population <- sub(".*_", "", full.data$population)
+    #full.data$Tissue <- str_match(full.data$population, "_(.*?)_")[, 2]
+    full.data.backup <- full.data
+    full.data <- cbind(sample.info, full.data)
+    full.data$Population <- paste0(full.data$Tissue, "_", full.data$Pop)
+
     #if (time.course == "Y") {
     #    full.data$Population <- sub(".*x", "", full.data$population)
     #}
-    full.data$Pop <- sub(".*_", "", full.data$population)
-    full.data$Subject <- sub("_.*", "", full.data$population)
+    #full.data$Pop <- sub(".*_", "", full.data$Population)
+    #full.data$Subject <- sub("_.*", "", full.data$population)
     is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) abs(x - round(x)) <
         tol
     full.data$Singleton <- !is.wholenumber(full.data$lineageID)
@@ -85,7 +114,7 @@ seqanalysis <- function(location) {
 
 
     # determine number of populations
-    poplist <- levels(as.factor(full.data$Population))
+    poplist <- levels(as.factor(full.data$population))
     numpops <- length(poplist)
     print(paste0("Analyzing ", numpops, " populations of cells:"))
     poplist
@@ -111,8 +140,15 @@ seqanalysis <- function(location) {
 
 
     non.single <- full.data[full.data$Singleton == FALSE, ]
-    lineage.data <- non.single[, c("Population", "lineageID", "Vgene")]
-    table.x <- table(lineage.data$lineageID, lineage.data$Population)
+
+    Sample.df <- table(full.data$Run, full.data$Lane, full.data$Pop, full.data$Tissue)
+    Sample.df <- melt(Sample.df)
+    Sample.df <- as.data.frame(Sample.df)
+    Sample.df <- Sample.df[Sample.df$value != 0,]
+    colnames(Sample.df) <- c('Run', 'Lane', 'Pop', 'Tissue', 'Sequences')
+
+    lineage.data <- non.single[, c("population", "lineageID", "Vgene")]
+    table.x <- table(lineage.data$lineageID, lineage.data$population)
     lineages.union <- as.data.frame.matrix(table.x)
 
 
@@ -122,27 +158,27 @@ seqanalysis <- function(location) {
     melt.lineage.table <- as.data.frame(melt(lineage.table))
     colnames(melt.lineage.table)[2] <- "Lineages"
 
-    vtable <- table(full.data$Population, full.data$Vgene)
+    vtable <- table(full.data$population, full.data$Vgene)
     vperc <- prop.table(vtable) * 100
 
-    jtable <- table(full.data$Population, full.data$JGene)
+    jtable <- table(full.data$population, full.data$JGene)
     jperc <- prop.table(jtable) * 100
 
-    seqs <- as.data.frame(table(full.data$Population))
+    seqs <- as.data.frame(table(non.single$population))
     master.data <- cbind(seqs, melt.lineage.table$Lineages)
 
-    colnames(master.data) <- c("Population", "Sequences", "Lineages")
+    colnames(master.data) <- c("Population", "Sequences (Non-Single)", "Lineages")
+    master.data <- cbind(Sample.df, master.data)
 
+    #if (length(levels(factor(full.data$Tissue))) != 1) {
+    #    master.data$Tissue <- sub("_.*", "", master.data$Population)
+    # else {
+    #    master.data$Tissue <- "Unknown"
+    #}
 
-    if (length(levels(factor(full.data$Tissue))) != 1) {
-        master.data$Tissue <- sub("_.*", "", master.data$Population)
-    } else {
-        master.data$Tissue <- "Unknown"
-    }
-
-    if (time.course == "Y") {
-        master.data$Tissue <- str_match(master.data$Population, "_(.*?)_")[, 2]
-    }
+    #if (time.course == "Y") {
+    #    master.data$Tissue <- str_match(master.data$Population, "_(.*?)_")[, 2]
+    #}
 
     print(master.data)
 
@@ -166,13 +202,15 @@ seqanalysis <- function(location) {
         clonality.df[k, 1] <- clon(lineages.union, col = k)
     }
 
+    colnames(clonality.df)[1] <- "Clonality"
+
     master.data <- cbind(master.data, clonality.df)
-    colnames(master.data)[5] <- "Clonality"
+
 
     full.data$Mutation_Rate <- full.data$V_Mutations/full.data$V_Nucleotides * 100
-    master.data$Mutation_Rate_Mean <- ddply(full.data, .(Population), summarize, mean = mean(Mutation_Rate))[,
+    master.data$Mutation_Rate_Mean <- ddply(full.data, .(population), summarize, mean = mean(Mutation_Rate))[,
         2]
-    master.data$Mutation_Rate_Median <- ddply(full.data, .(Population), summarize, median = median(Mutation_Rate))[,
+    master.data$Mutation_Rate_Median <- ddply(full.data, .(population), summarize, median = median(Mutation_Rate))[,
         2]
 
 
@@ -187,12 +225,12 @@ seqanalysis <- function(location) {
         IgM <- full.data[full.data$isotype == "M", ]
         IgE <- full.data[full.data$isotype == "E", ]
         IgU <- full.data[full.data$isotype == "U", ]
-        Ig <- Ig[Ig$Population == poplist[n], ]
-        IgG <- IgG[IgG$Population == poplist[n], ]
-        IgA <- IgA[IgA$Population == poplist[n], ]
-        IgM <- IgM[IgM$Population == poplist[n], ]
-        IgE <- IgE[IgE$Population == poplist[n], ]
-        IgU <- IgU[IgU$Population == poplist[n], ]
+        Ig <- Ig[Ig$population == poplist[n], ]
+        IgG <- IgG[IgG$population == poplist[n], ]
+        IgA <- IgA[IgA$population == poplist[n], ]
+        IgM <- IgM[IgM$population == poplist[n], ]
+        IgE <- IgE[IgE$population == poplist[n], ]
+        IgU <- IgU[IgU$population == poplist[n], ]
         iso.info[n, 1] <- nrow(IgM)
         iso.info[n, 2] <- nrow(IgG)
         iso.info[n, 3] <- nrow(IgA)
@@ -238,12 +276,155 @@ seqanalysis <- function(location) {
     master.data <- cbind(master.data, iso.info)
 
 
+    non.single$Mutation_Rate <- non.single$V_Mutations/non.single$V_Nucleotides * 100
+    master.data$Mutation_Rate_Mean_NS <- ddply(non.single, .(population), summarize, mean = mean(Mutation_Rate))[,
+        2]
+    master.data$Mutation_Rate_Median_NS <- ddply(non.single, .(population), summarize, median = median(Mutation_Rate))[,
+        2]
+
+
+    nonsingle.iso.info <- data.frame()
+
+    for (n in 1:numpops) {
+        Ig <- non.single[non.single$isotype != "U", ]
+        IgG <- non.single[non.single$isotype == "G", ]
+        IgA <- non.single[non.single$isotype == "A", ]
+        IgM <- non.single[non.single$isotype == "M", ]
+        IgE <- non.single[non.single$isotype == "E", ]
+        IgU <- non.single[non.single$isotype == "U", ]
+        Ig <- Ig[Ig$population == poplist[n], ]
+        IgG <- IgG[IgG$population == poplist[n], ]
+        IgA <- IgA[IgA$population == poplist[n], ]
+        IgM <- IgM[IgM$population == poplist[n], ]
+        IgE <- IgE[IgE$population == poplist[n], ]
+        IgU <- IgU[IgU$population == poplist[n], ]
+        nonsingle.iso.info[n, 1] <- nrow(IgM)
+        nonsingle.iso.info[n, 2] <- nrow(IgG)
+        nonsingle.iso.info[n, 3] <- nrow(IgA)
+        nonsingle.iso.info[n, 4] <- nrow(IgE)
+        nonsingle.iso.info[n, 5] <- nrow(IgU)
+        nonsingle.iso.info[n, 6] <- round((nrow(IgM)/nrow(Ig) * 100), 2)
+        nonsingle.iso.info[n, 7] <- round((nrow(IgG)/nrow(Ig) * 100), 2)
+        nonsingle.iso.info[n, 8] <- round((nrow(IgA)/nrow(Ig) * 100), 2)
+        nonsingle.iso.info[n, 9] <- round((nrow(IgE)/nrow(Ig) * 100), 2)
+        nonsingle.iso.info[n, 10] <- round((nrow(IgU)/nrow(non.single) * 100), 2)
+        nonsingle.iso.info[n, 11] <- round(mean(IgM$V_Mutations), 2)
+        nonsingle.iso.info[n, 12] <- round(mean(IgG$V_Mutations), 2)
+        nonsingle.iso.info[n, 13] <- round(mean(IgA$V_Mutations), 2)
+        nonsingle.iso.info[n, 14] <- round(mean(IgE$V_Mutations), 2)
+        nonsingle.iso.info[n, 15] <- round(mean(IgU$V_Mutations), 2)
+        nonsingle.iso.info[n, 16] <- round(median(IgM$V_Mutations), 2)
+        nonsingle.iso.info[n, 17] <- round(median(IgG$V_Mutations), 2)
+        nonsingle.iso.info[n, 18] <- round(median(IgA$V_Mutations), 2)
+        nonsingle.iso.info[n, 19] <- round(median(IgE$V_Mutations), 2)
+        nonsingle.iso.info[n, 20] <- round(median(IgU$V_Mutations), 2)
+        nonsingle.iso.info[n, 21] <- round(mean(IgM$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 22] <- round(mean(IgG$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 23] <- round(mean(IgA$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 24] <- round(mean(IgE$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 25] <- round(mean(IgU$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 26] <- round(median(IgM$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 27] <- round(median(IgG$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 28] <- round(median(IgA$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 29] <- round(median(IgE$Mutation_Rate), 2)
+        nonsingle.iso.info[n, 30] <- round(median(IgU$Mutation_Rate), 2)
+    }
+
+    colnames(nonsingle.iso.info) <- c("IgM Sequences_NS", "IgG Sequences_NS", "IgA Sequences_NS", "IgE Sequences_NS",
+        "Unknown Isotype Sequences_NS", "Percent IgM_NS", "Percent IgG_NS", "Percent IgA_NS",
+        "Percent IgE_NS", "Percent Unknown Isotype_NS", "IgM Mutations (Mean)_NS", "IgG Mutations (Mean)_NS",
+        "IgA Mutations (Mean)_NS", "IgE Mutations (Mean)_NS", "Unknown Isotype Mutations (Mean)_NS",
+        "IgM Mutations (Median)_NS", "IgG Mutations (Median)_NS", "IgA Mutations (Median)_NS",
+        "IgE Mutations (Median)_NS", "Unknown Isotype Mutations (Median)_NS", "IgM Mutation Rate (Mean)_NS",
+        "IgG Mutation Rate (Mean)_NS", "IgA Mutation Rate (Mean)_NS", "IgE Mutation Rate (Mean)_NS",
+        "Unknown Isotype Mutation Rate (Mean)_NS", "IgM Mutation Rate (Median)_NS", "IgG Mutation Rate (Median)_NS",
+        "IgA Mutation Rate (Median)_NS", "IgE Mutation Rate (Median)_NS", "Unknown Isotype Mutation Rate (Median)_NS")
+
+    master.data <- cbind(master.data, nonsingle.iso.info)
+
+
+#     ## Summarizes data.
+#     ## Gives count, mean, standard deviation, standard error of the mean, and confidence
+#     ## interval (default 95%).
+#     ##   data: a data frame.
+#     ##   measurevar: the name of a column that contains the variable to be summariezed
+#     ##   groupvars: a vector containing names of columns that contain grouping variables
+#     ##   na.rm: a boolean that indicates whether to ignore NA's
+#     ##   conf.interval: the percent range of the confidence interval (default is 95%)
+#     summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE, conf.interval=.95) {
+#         library(doBy)
+#
+#         # New version of length which can handle NA's: if na.rm==T, don't count them
+#         length2 <- function (x, na.rm=FALSE) {
+#             if (na.rm) sum(!is.na(x))
+#             else       length(x)
+#         }
+#
+#         # Collapse the data
+#         formula <- as.formula(paste(measurevar, paste(groupvars, collapse=" + "), sep=" ~ "))
+#         datac <- summaryBy(formula, data=data, FUN=c(length2,mean,median), na.rm=na.rm)
+#
+#         # Rename columns
+#         names(datac)[ names(datac) == paste(measurevar, ".mean",    sep="") ] <- "mean"
+#         names(datac)[ names(datac) == paste(measurevar, ".median",      sep="") ] <- "median"
+#         names(datac)[ names(datac) == paste(measurevar, ".length2", sep="") ] <- "N"
+#
+#         return(datac)
+#     }
+#
+# tgc <- summarySE(non.single, measurevar="Mutation_Rate", groupvars=c("Population", "LineageID","isotype"))
+
+
+full.data$V_SilentMutation_Rate <- full.data$V_SilentMutations / full.data$V_Nucleotides * 100
+full.data$V_NonsilentMutation_Rate <- full.data$V_NonsilentMutations / full.data$V_Nucleotides * 100
+full.data$FR1_Mutation_Rate <- full.data$FR1_Mutations / full.data$FR1_Nucleotides * 100
+full.data$FR1_SilentMutation_Rate <- full.data$FR1_SilentMutations / full.data$FR1_Nucleotides * 100
+full.data$FR1_NonsilentMutation_Rate <- full.data$FR1_NonsilentMutations / full.data$FR1_Nucleotides * 100
+full.data$CDR1_Mutation_Rate <- full.data$CDR1_Mutations / full.data$CDR1_Nucleotides * 100
+full.data$CDR1_SilentMutation_Rate <- full.data$CDR1_SilentMutations / full.data$CDR1_Nucleotides * 100
+full.data$CDR1_NonsilentMutation_Rate <- full.data$CDR1_NonsilentMutations / full.data$CDR1_Nucleotides * 100
+full.data$FR2_Mutation_Rate <- full.data$FR2_Mutations / full.data$FR2_Nucleotides * 100
+full.data$FR2_SilentMutation_Rate <- full.data$FR2_SilentMutations / full.data$FR2_Nucleotides * 100
+full.data$FR2_NonsilentMutation_Rate <- full.data$FR2_NonsilentMutations / full.data$FR2_Nucleotides * 100
+full.data$CDR2_Mutation_Rate <- full.data$CDR2_Mutations / full.data$CDR2_Nucleotides * 100
+full.data$CDR2_SilentMutation_Rate <- full.data$CDR2_SilentMutations / full.data$CDR2_Nucleotides * 100
+full.data$CDR2_NonsilentMutation_Rate <- full.data$CDR2_NonsilentMutations / full.data$CDR2_Nucleotides * 100
+full.data$FR3_Mutation_Rate <- full.data$FR3_Mutations / full.data$FR3_Nucleotides * 100
+full.data$FR3_SilentMutation_Rate <- full.data$FR3_SilentMutations / full.data$FR3_Nucleotides * 100
+full.data$FR3_NonsilentMutation_Rate <- full.data$FR3_NonsilentMutations / full.data$FR3_Nucleotides * 100
+
+extended.mut.info <- data.frame()
+
+for (n in 1:numpops) {
+    df.em <- full.data[full.data$population == poplist[n], ]
+    extended.mut.info[n, 1] <- round(mean(df.em$V_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 2] <- round(mean(df.em$V_NonsilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 3] <- round(mean(df.em$FR1_Mutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 4] <- round(mean(df.em$FR1_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 5] <- round(mean(df.em$FR1_NonsilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 6] <- round(mean(df.em$CDR1_Mutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 7] <- round(mean(df.em$CDR1_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 8] <- round(mean(df.em$CDR1_NonsilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 9] <- round(mean(df.em$FR2_Mutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 10] <- round(mean(df.em$FR2_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 11] <- round(mean(df.em$FR2_NonsilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 12] <- round(mean(df.em$CDR2_Mutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 13] <- round(mean(df.em$CDR2_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 14] <- round(mean(df.em$CDR2_NonsilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 15] <- round(mean(df.em$FR3_Mutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 16] <- round(mean(df.em$FR3_SilentMutation_Rate, na.rm = TRUE), 2)
+    extended.mut.info[n, 17] <- round(mean(df.em$FR3_NonsilentMutation_Rate, na.rm = TRUE), 2)
+}
+
+    colnames(extended.mut.info) <- c("V_SilentMutation_Rate", "V_NonsilentMutation_Rate", "FR1_Mutation_Rate", "FR1_SilentMutation_Rate", "FR1_NonsilentMutation_Rate", "CDR1_Mutation_Rate", "CDR1_SilentMutation_Rate", "CDR1_NonsilentMutation_Rate", "FR2_Mutation_Rate", "FR2_SilentMutation_Rate", "FR2_NonsilentMutation_Rate", "CDR2_Mutation_Rate", "CDR2_SilentMutation_Rate", "CDR2_NonsilentMutation_Rate", "FR3_Mutation_Rate", "FR3_SilentMutation_Rate", "FR3_NonsilentMutation_Rate")
+
+    master.data <- cbind(master.data, extended.mut.info)
     #master.data$Disease <- config.info$Disease[1]
     #master.data$Vaccine <- config.info$Vaccine[1]
     #master.data$Vaccine_Time <- config.info$Vaccine_Time[1]
 
 
-    vgene.table <- table(full.data$Population, full.data$Vgene)
+    vgene.table <- table(full.data$population, full.data$Vgene)
     vgene.perc <- prop.table(vgene.table) * 100
 
     master.data$IGHV4_34 <- vgene.perc[, "IGHV4-34"]
@@ -255,19 +436,28 @@ seqanalysis <- function(location) {
 
 
     V434$AVY <- substrRight(V434$AA_FR1, 3)
-    AVY.table <- table(V434$Population, V434$AVY)
+    AVY.table <- table(V434$population, V434$AVY)
     master.data$AVY_perc <- AVY.table[, "AVY"]/rowSums(AVY.table) * 100
 
 
+write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
+
+}
+
+
+"IGHV1-18"   "IGHV1-2"    "IGHV1-24"   "IGHV1-3"    "IGHV1-45"   "IGHV1-46"   "IGHV1-58"
+"IGHV1-69"   "IGHV1-8"    "IGHV1-f"    "IGHV2-26"   "IGHV2-5"    "IGHV2-70D"  "IGHV3-11"
+"IGHV3-13"   "IGHV3-15"   "IGHV3-20"   "IGHV3-21"   "IGHV3-22"   "IGHV3-23"   "IGHV3-30"
+"IGHV3-30-3" "IGHV3-33"   "IGHV3-43"   "IGHV3-43D"  "IGHV3-48"   "IGHV3-49"   "IGHV3-53"
+"IGHV3-64"   "IGHV3-66"   "IGHV3-7"    "IGHV3-72"   "IGHV3-73"   "IGHV3-74"   "IGHV3-9"
+"IGHV3-d"    "IGHV3-h"    "IGHV3-NL1"  "IGHV4-28"   "IGHV4-30-2" "IGHV4-30-4" "IGHV4-31"
+"IGHV4-34"   "IGHV4-39"   "IGHV4-4"    "IGHV4-55"   "IGHV4-59"   "IGHV4-61"   "IGHV4-b"
+"IGHV5-51"   "IGHV6-1"
 
 
 
 
-
-
-
-
-
+##############################
 
 
 
