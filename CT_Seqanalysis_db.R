@@ -496,6 +496,12 @@ for (n in 1:numpops) {
         IGHV4.b <- df.popgenes[df.popgenes$Vgene == 'IGHV4-b', ]
         IGHV5.51 <- df.popgenes[df.popgenes$Vgene == 'IGHV5-51', ]
         IGHV6.1 <- df.popgenes[df.popgenes$Vgene == 'IGHV6-1', ]
+        IGHJ1 <- df.popgenes[df.popgenes$JGene == 'IGHJ1', ]
+        IGHJ2 <- df.popgenes[df.popgenes$JGene == 'IGHJ2', ]
+        IGHJ3 <- df.popgenes[df.popgenes$JGene == 'IGHJ3', ]
+        IGHJ4 <- df.popgenes[df.popgenes$JGene == 'IGHJ4', ]
+        IGHJ5 <- df.popgenes[df.popgenes$JGene == 'IGHJ5', ]
+        IGHJ6 <- df.popgenes[df.popgenes$JGene == 'IGHJ6', ]
         gene.info[n, 1] <- round(nrow(IGHV1.2)/nrow(df.popgenes)*100, 2)
         gene.info[n, 2] <- round(nrow(IGHV1.3)/nrow(df.popgenes)*100, 2)
         gene.info[n, 3] <- round(nrow(IGHV1.8)/nrow(df.popgenes)*100, 2)
@@ -546,6 +552,12 @@ for (n in 1:numpops) {
         gene.info[n, 48] <- round(nrow(IGHV4.b)/nrow(df.popgenes)*100, 2)
         gene.info[n, 49] <- round(nrow(IGHV5.51)/nrow(df.popgenes)*100, 2)
         gene.info[n, 50] <- round(nrow(IGHV6.1)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 51] <- round(nrow(IGHJ1)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 52] <- round(nrow(IGHJ2)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 53] <- round(nrow(IGHJ3)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 54] <- round(nrow(IGHJ4)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 55] <- round(nrow(IGHJ5)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 56] <- round(nrow(IGHJ6)/nrow(df.popgenes)*100, 2)
     }
 
 
@@ -556,7 +568,7 @@ colnames(gene.info) <- c('IGHV1-2','IGHV1-3','IGHV1-8','IGHV1-18','IGHV1-24','IG
 'IGHV3-64','IGHV3-66','IGHV3-72','IGHV3-73','IGHV3-74',
 'IGHV3-d','IGHV3-h','IGHV4-4','IGHV4-28','IGHV4-30-2','IGHV4-30-4','IGHV4-31',
 'IGHV4-34','IGHV4-39','IGHV4-55','IGHV4-59','IGHV4-61','IGHV4-b',
-'IGHV5-51','IGHV6-1')
+'IGHV5-51','IGHV6-1', 'IGHJ1', 'IGHJ2', 'IGHJ3', 'IGHJ4', 'IGHJ5', 'IGHJ6')
 
 
 
