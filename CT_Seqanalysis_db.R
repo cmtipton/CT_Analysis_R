@@ -440,19 +440,136 @@ for (n in 1:numpops) {
     master.data$AVY_perc <- AVY.table[, "AVY"]/rowSums(AVY.table) * 100
 
 
+#Calculate the percent of each VH gene and JH gene
+
+    gene.info <- data.frame()
+
+    for (n in 1:numpops) {
+        df.popgenes <- full.data[full.data$population == poplist[n], ]
+        IGHV1.2 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-2', ]
+        IGHV1.3 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-3', ]
+        IGHV1.8 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-8', ]
+        IGHV1.18 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-18', ]
+        IGHV1.24 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-24', ]
+        IGHV1.45 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-45', ]
+        IGHV1.46 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-46', ]
+        IGHV1.58 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-58', ]
+        IGHV1.69 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-69', ]
+        IGHV1.f <- df.popgenes[df.popgenes$Vgene == 'IGHV1-f', ]
+        IGHV2.5 <- df.popgenes[df.popgenes$Vgene == 'IGHV2-5', ]
+        IGHV2.26 <- df.popgenes[df.popgenes$Vgene == 'IGHV2-26', ]
+        IGHV2.70D <- df.popgenes[df.popgenes$Vgene == 'IGHV2-70D', ]
+        IGHV3.7 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-7', ]
+        IGHV3.9 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-9', ]
+        IGHV3.11 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-11', ]
+        IGHV3.13 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-13', ]
+        IGHV3.15 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-15', ]
+        IGHV3.20 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-20', ]
+        IGHV3.21 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-21', ]
+        IGHV3.22 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-22', ]
+        IGHV3.23 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-23', ]
+        IGHV3.30 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-30', ]
+        IGHV3.30.3 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-30-3', ]
+        IGHV3.33 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-33', ]
+        IGHV3.43 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-43', ]
+        IGHV3.43D <- df.popgenes[df.popgenes$Vgene == 'IGHV3-43D', ]
+        IGHV3.48 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-48', ]
+        IGHV3.49 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-49', ]
+        IGHV3.53 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-53', ]
+        IGHV3.64 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-64', ]
+        IGHV3.66 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-66', ]
+        IGHV3.72 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-72', ]
+        IGHV3.73 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-73', ]
+        IGHV3.74 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-74', ]
+        IGHV3.d <- df.popgenes[df.popgenes$Vgene == 'IGHV3-d', ]
+        IGHV3.h <- df.popgenes[df.popgenes$Vgene == 'IGHV3-h', ]
+        IGHV4.4 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-4', ]
+        IGHV4.28 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-28', ]
+        IGHV4.30.2 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-30-2', ]
+        IGHV4.30.4 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-30-4', ]
+        IGHV4.31 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-31', ]
+        IGHV4.34 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-34', ]
+        IGHV4.39 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-39', ]
+        IGHV4.55 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-55', ]
+        IGHV4.59 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-59', ]
+        IGHV4.61 <- df.popgenes[df.popgenes$Vgene == 'IGHV4-61', ]
+        IGHV4.b <- df.popgenes[df.popgenes$Vgene == 'IGHV4-b', ]
+        IGHV5.51 <- df.popgenes[df.popgenes$Vgene == 'IGHV5-51', ]
+        IGHV6.1 <- df.popgenes[df.popgenes$Vgene == 'IGHV6-1', ]
+        gene.info[n, 1] <- round(nrow(IGHV1.2)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 2] <- round(nrow(IGHV1.3)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 3] <- round(nrow(IGHV1.8)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 4] <- round(nrow(IGHV1.18)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 5] <- round(nrow(IGHV1.24)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 6] <- round(nrow(IGHV1.45)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 7] <- round(nrow(IGHV1.46)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 8] <- round(nrow(IGHV1.58)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 9] <- round(nrow(IGHV1.69)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 10] <- round(nrow(IGHV1.f)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 11] <- round(nrow(IGHV2.5)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 12] <- round(nrow(IGHV2.26)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 13] <- round(nrow(IGHV2.70D)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 14] <- round(nrow(IGHV3.7)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 15] <- round(nrow(IGHV3.9)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 16] <- round(nrow(IGHV3.11)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 17] <- round(nrow(IGHV3.13)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 18] <- round(nrow(IGHV3.15)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 19] <- round(nrow(IGHV3.20)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 20] <- round(nrow(IGHV3.21)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 21] <- round(nrow(IGHV3.22)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 22] <- round(nrow(IGHV3.23)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 23] <- round(nrow(IGHV3.30)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 24] <- round(nrow(IGHV3.30.3)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 25] <- round(nrow(IGHV3.33)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 26] <- round(nrow(IGHV3.43)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 27] <- round(nrow(IGHV3.43D)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 28] <- round(nrow(IGHV3.48)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 29] <- round(nrow(IGHV3.49)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 30] <- round(nrow(IGHV3.53)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 31] <- round(nrow(IGHV3.64)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 32] <- round(nrow(IGHV3.66)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 33] <- round(nrow(IGHV3.72)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 34] <- round(nrow(IGHV3.73)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 35] <- round(nrow(IGHV3.74)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 36] <- round(nrow(IGHV3.d)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 37] <- round(nrow(IGHV3.h)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 38] <- round(nrow(IGHV4.4)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 39] <- round(nrow(IGHV4.28)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 40] <- round(nrow(IGHV4.30.2)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 41] <- round(nrow(IGHV4.30.4)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 42] <- round(nrow(IGHV4.31)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 43] <- round(nrow(IGHV4.34)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 44] <- round(nrow(IGHV4.39)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 45] <- round(nrow(IGHV4.55)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 46] <- round(nrow(IGHV4.59)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 47] <- round(nrow(IGHV4.61)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 48] <- round(nrow(IGHV4.b)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 49] <- round(nrow(IGHV5.51)/nrow(df.popgenes)*100, 2)
+        gene.info[n, 50] <- round(nrow(IGHV6.1)/nrow(df.popgenes)*100, 2)
+    }
+
+
+colnames(gene.info) <- c('IGHV1-2','IGHV1-3','IGHV1-8','IGHV1-18','IGHV1-24','IGHV1-45','IGHV1-46','IGHV1-58','IGHV1-69',
+'IGHV1-f','IGHV2-5','IGHV2-26','IGHV2-70D','IGHV3-7','IGHV3-9','IGHV3-11',
+'IGHV3-13','IGHV3-15','IGHV3-20','IGHV3-21','IGHV3-22','IGHV3-23','IGHV3-30',
+'IGHV3-30-3','IGHV3-33','IGHV3-43','IGHV3-43D','IGHV3-48','IGHV3-49','IGHV3-53',
+'IGHV3-64','IGHV3-66','IGHV3-72','IGHV3-73','IGHV3-74',
+'IGHV3-d','IGHV3-h','IGHV4-4','IGHV4-28','IGHV4-30-2','IGHV4-30-4','IGHV4-31',
+'IGHV4-34','IGHV4-39','IGHV4-55','IGHV4-59','IGHV4-61','IGHV4-b',
+'IGHV5-51','IGHV6-1')
+
+
+
+master.data <- cbind(master.data, gene.info)
+
+
+
 write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
 
 }
 
 
-"IGHV1-18"   "IGHV1-2"    "IGHV1-24"   "IGHV1-3"    "IGHV1-45"   "IGHV1-46"   "IGHV1-58"
-"IGHV1-69"   "IGHV1-8"    "IGHV1-f"    "IGHV2-26"   "IGHV2-5"    "IGHV2-70D"  "IGHV3-11"
-"IGHV3-13"   "IGHV3-15"   "IGHV3-20"   "IGHV3-21"   "IGHV3-22"   "IGHV3-23"   "IGHV3-30"
-"IGHV3-30-3" "IGHV3-33"   "IGHV3-43"   "IGHV3-43D"  "IGHV3-48"   "IGHV3-49"   "IGHV3-53"
-"IGHV3-64"   "IGHV3-66"   "IGHV3-7"    "IGHV3-72"   "IGHV3-73"   "IGHV3-74"   "IGHV3-9"
-"IGHV3-d"    "IGHV3-h"    "IGHV3-NL1"  "IGHV4-28"   "IGHV4-30-2" "IGHV4-30-4" "IGHV4-31"
-"IGHV4-34"   "IGHV4-39"   "IGHV4-4"    "IGHV4-55"   "IGHV4-59"   "IGHV4-61"   "IGHV4-b"
-"IGHV5-51"   "IGHV6-1"
+
 
 
 
