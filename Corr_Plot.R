@@ -63,7 +63,7 @@ ggcorrplot <- function (corr, method = c("square", "circle"),
     p <-
         p + ggplot2::scale_fill_gradient2(
             low = colors[1], high = colors[3], mid = colors[2],
-            midpoint = 10, limit = c(0,30), space = "Lab",
+            midpoint = .25, limit = c(0,1), space = "Lab",
             name = legend.title
         ) +
         ggtheme() +
@@ -170,5 +170,5 @@ ggcorrplot(df, hc.order = TRUE,
            lab_size = 3,
            method="circle",
            colors = c("tomato2", "white", "springgreen3"),
-           title="Percent Matching",
+           title="Morisita Index", legend.title = "MI",
            ggtheme=theme_bw)
