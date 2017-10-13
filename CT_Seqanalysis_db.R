@@ -25,9 +25,9 @@ seqanalysis <- function(location) {
     }
 
     # establish input and output file locations
-    location <- '/Users/cmtipto/Desktop/Test/Test'
+    location <- '/Users/cmtipto/Desktop/Test/908'
     location2 <- location
-    location <- paste0(location, "/IgSeq")
+    #location <- paste0(location, "/IgSeq")
     # file.dir <- paste0(location, '/lineageOutput/withIdenticals/') file.x <<-
     # paste0(file.dir, 'GROUPED_LINEAGE_COUNTS.txt')
     file.out <- paste0(location, "/CT_Sequencing_Analysis/")
@@ -45,44 +45,44 @@ seqanalysis <- function(location) {
     #config.file <- paste0(location2, "/", config.location[1])
     #config.info <- read.csv(config.file, sep = "\t", header = TRUE)
     #time.course <- config.info$Time_Course[1]
-    under <- str_count(full.data$population[1],"\\_")
-    dash <- str_count(full.data$population[1],"\\-")
-    nolane <- str_count(full.data$population[1],"\\_S[0-9]")
-
-    if (under == 4){
-        sample.info <- str_split_fixed(full.data$population, "_", 5)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
-    } else if (dash == 4) {
-        sample.info <- str_split_fixed(full.data$population, "-", 5)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
-    } else if (nolane == 1 & under == 3) {
-        sample.info <- str_split_fixed(full.data$population, "_", 4)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
-    } else if (nolane == 0 & dash == 3) {
-        print('Error: No lane detected')
-        sample.info <- str_split_fixed(full.data$population, "_", 4)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
-    } else if (nolane == 0 & under == 3) {
-        print('Error: No lane detected')
-        sample.info <- str_split_fixed(full.data$population, "_", 4)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
-    } else {
-        print('Error with input nomenclature')
-        sample.info <- str_split_fixed(full.data$population, "_", 4)
-        sample.info <- as.data.frame(sample.info)
-        colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
-    }
+    # under <- str_count(full.data$population[1],"\\_")
+    # dash <- str_count(full.data$population[1],"\\-")
+    # nolane <- str_count(full.data$population[1],"\\_S[0-9]")
+    #
+    # if (under == 4){
+    #     sample.info <- str_split_fixed(full.data$population, "_", 5)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
+    # } else if (dash == 4) {
+    #     sample.info <- str_split_fixed(full.data$population, "-", 5)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop', 'Lane')
+    # } else if (nolane == 1 & under == 3) {
+    #     sample.info <- str_split_fixed(full.data$population, "_", 4)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    # } else if (nolane == 0 & dash == 3) {
+    #     print('Error: No lane detected')
+    #     sample.info <- str_split_fixed(full.data$population, "_", 4)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    # } else if (nolane == 0 & under == 3) {
+    #     print('Error: No lane detected')
+    #     sample.info <- str_split_fixed(full.data$population, "_", 4)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    # } else {
+    #     print('Error with input nomenclature')
+    #     sample.info <- str_split_fixed(full.data$population, "_", 4)
+    #     sample.info <- as.data.frame(sample.info)
+    #     colnames(sample.info) <- c('Run', 'Subject', 'Tissue', 'Pop')
+    # }
 
     #full.data$Population <- sub(".*_", "", full.data$population)
     #full.data$Tissue <- str_match(full.data$population, "_(.*?)_")[, 2]
     full.data.backup <- full.data
-    full.data <- cbind(sample.info, full.data)
-    full.data$Population <- paste0(full.data$Tissue, "_", full.data$Pop)
+    #full.data <- cbind(sample.info, full.data)
+    # full.data$Population <- paste0(full.data$Tissue, "_", full.data$Pop)
 
     #if (time.course == "Y") {
     #    full.data$Population <- sub(".*x", "", full.data$population)
@@ -141,11 +141,11 @@ seqanalysis <- function(location) {
 
     non.single <- full.data[full.data$Singleton == FALSE, ]
 
-    Sample.df <- table(full.data$Run, full.data$Lane, full.data$Pop, full.data$Tissue)
-    Sample.df <- melt(Sample.df)
-    Sample.df <- as.data.frame(Sample.df)
-    Sample.df <- Sample.df[Sample.df$value != 0,]
-    colnames(Sample.df) <- c('Run', 'Lane', 'Pop', 'Tissue', 'Sequences')
+    # Sample.df <- table(full.data$Run, full.data$Lane, full.data$Pop, full.data$Tissue)
+    # Sample.df <- melt(Sample.df)
+    # Sample.df <- as.data.frame(Sample.df)
+    # Sample.df <- Sample.df[Sample.df$value != 0,]
+    # colnames(Sample.df) <- c('Run', 'Lane', 'Pop', 'Tissue', 'Sequences')
 
     lineage.data <- non.single[, c("population", "lineageID", "Vgene")]
     table.x <- table(lineage.data$lineageID, lineage.data$population)
@@ -168,7 +168,7 @@ seqanalysis <- function(location) {
     master.data <- cbind(seqs, melt.lineage.table$Lineages)
 
     colnames(master.data) <- c("Population", "Sequences (Non-Single)", "Lineages")
-    master.data <- cbind(Sample.df, master.data)
+    #master.data <- cbind(Sample.df, master.data)
 
     #if (length(levels(factor(full.data$Tissue))) != 1) {
     #    master.data$Tissue <- sub("_.*", "", master.data$Population)
@@ -480,6 +480,7 @@ for (n in 1:numpops) {
         IGHV3.66 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-66', ]
         IGHV3.72 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-72', ]
         IGHV3.73 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-73', ]
+        IGHV3.64 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-64', ]
         IGHV3.74 <- df.popgenes[df.popgenes$Vgene == 'IGHV3-74', ]
         IGHV3.d <- df.popgenes[df.popgenes$Vgene == 'IGHV3-d', ]
         IGHV3.h <- df.popgenes[df.popgenes$Vgene == 'IGHV3-h', ]
@@ -577,250 +578,250 @@ colnames(gene.info) <- c("IGHV1-2", "IGHV1-3", "IGHV1-8", "IGHV1-18", "IGHV1-24"
 master.data <- cbind(master.data, gene.info)
 
 
-IGHV1.2 <- full.data[full.data$Vgene == "IGHV1-2", ]
-IGHV1.2$Last3FR1 <- substrRight(IGHV1.2$AA_FR1, 3)
-IGHV1.2.table <- table(IGHV1.2$population, IGHV1.2$Last3FR1)
-master.data$IGHV1.2_Last3FR1 <- IGHV1.2.table[, "KAS"]/rowSums(IGHV1.2.table) * 100
-
-IGHV1.3 <- full.data[full.data$Vgene == "IGHV1-3", ]
-IGHV1.3$Last3FR1 <- substrRight(IGHV1.3$AA_FR1, 3)
-IGHV1.3.table <- table(IGHV1.3$population, IGHV1.3$Last3FR1)
-master.data$IGHV1.3_Last3FR1 <- IGHV1.3.table[, "KAS"]/rowSums(IGHV1.3.table) * 100
-
-IGHV1.8 <- full.data[full.data$Vgene == "IGHV1-8", ]
-IGHV1.8$Last3FR1 <- substrRight(IGHV1.8$AA_FR1, 3)
-IGHV1.8.table <- table(IGHV1.8$population, IGHV1.8$Last3FR1)
-master.data$IGHV1.8_Last3FR1 <- IGHV1.8.table[, "KAS"]/rowSums(IGHV1.8.table) * 100
-
-IGHV1.18 <- full.data[full.data$Vgene == "IGHV1-18", ]
-IGHV1.18$Last3FR1 <- substrRight(IGHV1.18$AA_FR1, 3)
-IGHV1.18.table <- table(IGHV1.18$population, IGHV1.18$Last3FR1)
-master.data$IGHV1.18_Last3FR1 <- IGHV1.18.table[, "KAS"]/rowSums(IGHV1.18.table) * 100
-
-IGHV1.24 <- full.data[full.data$Vgene == "IGHV1-24", ]
-IGHV1.24$Last3FR1 <- substrRight(IGHV1.24$AA_FR1, 3)
-IGHV1.24.table <- table(IGHV1.24$population, IGHV1.24$Last3FR1)
-master.data$IGHV1.24_Last3FR1 <- IGHV1.24.table[, "KVS"]/rowSums(IGHV1.24.table) * 100
-
-IGHV1.45 <- full.data[full.data$Vgene == "IGHV1-45", ]
-IGHV1.45$Last3FR1 <- substrRight(IGHV1.45$AA_FR1, 3)
-IGHV1.45.table <- table(IGHV1.45$population, IGHV1.45$Last3FR1)
-master.data$IGHV1.45_Last3FR1 <- IGHV1.45.table[, "KAS"]/rowSums(IGHV1.45.table) * 100
-
-IGHV1.46 <- full.data[full.data$Vgene == "IGHV1-46", ]
-IGHV1.46$Last3FR1 <- substrRight(IGHV1.46$AA_FR1, 3)
-IGHV1.46.table <- table(IGHV1.46$population, IGHV1.46$Last3FR1)
-master.data$IGHV1.46_Last3FR1 <- IGHV1.46.table[, "KAS"]/rowSums(IGHV1.46.table) * 100
-
-IGHV1.58 <- full.data[full.data$Vgene == "IGHV1-58", ]
-IGHV1.58$Last3FR1 <- substrRight(IGHV1.58$AA_FR1, 3)
-IGHV1.58.table <- table(IGHV1.58$population, IGHV1.58$Last3FR1)
-master.data$IGHV1.58_Last3FR1 <- IGHV1.58.table[, "KAS"]/rowSums(IGHV1.58.table) * 100
-
-IGHV1.69 <- full.data[full.data$Vgene == "IGHV1-69", ]
-IGHV1.69$Last3FR1 <- substrRight(IGHV1.69$AA_FR1, 3)
-IGHV1.69.table <- table(IGHV1.69$population, IGHV1.69$Last3FR1)
-master.data$IGHV1.69_Last3FR1 <- IGHV1.69.table[, "KAS"]/rowSums(IGHV1.69.table) * 100
-
-IGHV2.5 <- full.data[full.data$Vgene == "IGHV2-5", ]
-IGHV2.5$Last3FR1 <- substrRight(IGHV2.5$AA_FR1, 3)
-IGHV2.5.table <- table(IGHV2.5$population, IGHV2.5$Last3FR1)
-master.data$IGHV2.5_Last3FR1 <- IGHV2.5.table[, "TFS"]/rowSums(IGHV2.5.table) * 100
-
-IGHV2.26 <- full.data[full.data$Vgene == "IGHV2-26", ]
-IGHV2.26$Last3FR1 <- substrRight(IGHV2.26$AA_FR1, 3)
-IGHV2.26.table <- table(IGHV2.26$population, IGHV2.26$Last3FR1)
-master.data$IGHV2.26_Last3FR1 <- IGHV2.26.table[, "TVS"]/rowSums(IGHV2.26.table) * 100
-
-IGHV2.70 <- full.data[full.data$Vgene == "IGHV2-70", ]
-IGHV2.70$Last3FR1 <- substrRight(IGHV2.70$AA_FR1, 3)
-IGHV2.70.table <- table(IGHV2.70$population, IGHV2.70$Last3FR1)
-master.data$IGHV2.70_Last3FR1 <- IGHV2.70.table[, "TFS"]/rowSums(IGHV2.70.table) * 100
-
-IGHV3.7 <- full.data[full.data$Vgene == "IGHV3-7", ]
-IGHV3.7$Last3FR1 <- substrRight(IGHV3.7$AA_FR1, 3)
-IGHV3.7.table <- table(IGHV3.7$population, IGHV3.7$Last3FR1)
-master.data$IGHV3.7_Last3FR1 <- IGHV3.7.table[, "AAS"]/rowSums(IGHV3.7.table) * 100
-
-IGHV3.9 <- full.data[full.data$Vgene == "IGHV3-9", ]
-IGHV3.9$Last3FR1 <- substrRight(IGHV3.9$AA_FR1, 3)
-IGHV3.9.table <- table(IGHV3.9$population, IGHV3.9$Last3FR1)
-master.data$IGHV3.9_Last3FR1 <- IGHV3.9.table[, "AAS"]/rowSums(IGHV3.9.table) * 100
-
-IGHV3.11 <- full.data[full.data$Vgene == "IGHV3-11", ]
-IGHV3.11$Last3FR1 <- substrRight(IGHV3.11$AA_FR1, 3)
-IGHV3.11.table <- table(IGHV3.11$population, IGHV3.11$Last3FR1)
-master.data$IGHV3.11_Last3FR1 <- IGHV3.11.table[, "AAS"]/rowSums(IGHV3.11.table) * 100
-
-IGHV3.13 <- full.data[full.data$Vgene == "IGHV3-13", ]
-IGHV3.13$Last3FR1 <- substrRight(IGHV3.13$AA_FR1, 3)
-IGHV3.13.table <- table(IGHV3.13$population, IGHV3.13$Last3FR1)
-master.data$IGHV3.13_Last3FR1 <- IGHV3.13.table[, "AAS"]/rowSums(IGHV3.13.table) * 100
-
-IGHV3.15 <- full.data[full.data$Vgene == "IGHV3-15", ]
-IGHV3.15$Last3FR1 <- substrRight(IGHV3.15$AA_FR1, 3)
-IGHV3.15.table <- table(IGHV3.15$population, IGHV3.15$Last3FR1)
-master.data$IGHV3.15_Last3FR1 <- IGHV3.15.table[, "AAS"]/rowSums(IGHV3.15.table) * 100
-
-IGHV3.20 <- full.data[full.data$Vgene == "IGHV3-20", ]
-IGHV3.20$Last3FR1 <- substrRight(IGHV3.20$AA_FR1, 3)
-IGHV3.20.table <- table(IGHV3.20$population, IGHV3.20$Last3FR1)
-master.data$IGHV3.20_Last3FR1 <- IGHV3.20.table[, "AAS"]/rowSums(IGHV3.20.table) * 100
-
-IGHV3.21 <- full.data[full.data$Vgene == "IGHV3-21", ]
-IGHV3.21$Last3FR1 <- substrRight(IGHV3.21$AA_FR1, 3)
-IGHV3.21.table <- table(IGHV3.21$population, IGHV3.21$Last3FR1)
-master.data$IGHV3.21_Last3FR1 <- IGHV3.21.table[, "AAS"]/rowSums(IGHV3.21.table) * 100
-
-IGHV3.23 <- full.data[full.data$Vgene == "IGHV3-23", ]
-IGHV3.23$Last3FR1 <- substrRight(IGHV3.23$AA_FR1, 3)
-IGHV3.23.table <- table(IGHV3.23$population, IGHV3.23$Last3FR1)
-master.data$IGHV3.23_Last3FR1 <- IGHV3.23.table[, "AAS"]/rowSums(IGHV3.23.table) * 100
-
-IGHV3.23D <- full.data[full.data$Vgene == "IGHV3-23D", ]
-IGHV3.23D$Last3FR1 <- substrRight(IGHV3.23D$AA_FR1, 3)
-IGHV3.23D.table <- table(IGHV3.23D$population, IGHV3.23D$Last3FR1)
-master.data$IGHV3.23D_Last3FR1 <- IGHV3.23D.table[, "AAS"]/rowSums(IGHV3.23D.table) * 100
-
-IGHV3.30 <- full.data[full.data$Vgene == "IGHV3-30", ]
-IGHV3.30$Last3FR1 <- substrRight(IGHV3.30$AA_FR1, 3)
-IGHV3.30.table <- table(IGHV3.30$population, IGHV3.30$Last3FR1)
-master.data$IGHV3.30_Last3FR1 <- IGHV3.30.table[, "AAS"]/rowSums(IGHV3.30.table) * 100
-
-IGHV3.30.3 <- full.data[full.data$Vgene == "IGHV3-30-3", ]
-IGHV3.30.3$Last3FR1 <- substrRight(IGHV3.30.3$AA_FR1, 3)
-IGHV3.30.3.table <- table(IGHV3.30.3$population, IGHV3.30.3$Last3FR1)
-master.data$IGHV3.30.3_Last3FR1 <- IGHV3.30.3.table[, "AAS"]/rowSums(IGHV3.30.3.table) * 100
-
-IGHV3.33 <- full.data[full.data$Vgene == "IGHV3-33", ]
-IGHV3.33$Last3FR1 <- substrRight(IGHV3.33$AA_FR1, 3)
-IGHV3.33.table <- table(IGHV3.33$population, IGHV3.33$Last3FR1)
-master.data$IGHV3.33_Last3FR1 <- IGHV3.33.table[, "AAS"]/rowSums(IGHV3.33.table) * 100
-
-IGHV3.43 <- full.data[full.data$Vgene == "IGHV3-43", ]
-IGHV3.43$Last3FR1 <- substrRight(IGHV3.43$AA_FR1, 3)
-IGHV3.43.table <- table(IGHV3.43$population, IGHV3.43$Last3FR1)
-master.data$IGHV3.43_Last3FR1 <- IGHV3.43.table[, "AAS"]/rowSums(IGHV3.43.table) * 100
-
-IGHV3.43D <- full.data[full.data$Vgene == "IGHV3-43D", ]
-IGHV3.43D$Last3FR1 <- substrRight(IGHV3.43D$AA_FR1, 3)
-IGHV3.43D.table <- table(IGHV3.43D$population, IGHV3.43D$Last3FR1)
-master.data$IGHV3.43D_Last3FR1 <- IGHV3.43D.table[, "AAS"]/rowSums(IGHV3.43D.table) * 100
-
-IGHV3.48 <- full.data[full.data$Vgene == "IGHV3-48", ]
-IGHV3.48$Last3FR1 <- substrRight(IGHV3.48$AA_FR1, 3)
-IGHV3.48.table <- table(IGHV3.48$population, IGHV3.48$Last3FR1)
-master.data$IGHV3.48_Last3FR1 <- IGHV3.48.table[, "AAS"]/rowSums(IGHV3.48.table) * 100
-
-IGHV3.49 <- full.data[full.data$Vgene == "IGHV3-49", ]
-IGHV3.49$Last3FR1 <- substrRight(IGHV3.49$AA_FR1, 3)
-IGHV3.49.table <- table(IGHV3.49$population, IGHV3.49$Last3FR1)
-master.data$IGHV3.49_Last3FR1 <- IGHV3.49.table[, "TAS"]/rowSums(IGHV3.49.table) * 100
-
-IGHV3.53 <- full.data[full.data$Vgene == "IGHV3-53", ]
-IGHV3.53$Last3FR1 <- substrRight(IGHV3.53$AA_FR1, 3)
-IGHV3.53.table <- table(IGHV3.53$population, IGHV3.53$Last3FR1)
-master.data$IGHV3.53_Last3FR1 <- IGHV3.53.table[, "AAS"]/rowSums(IGHV3.53.table) * 100
-
-IGHV3.64 <- full.data[full.data$Vgene == "IGHV3-64", ]
-IGHV3.64$Last3FR1 <- substrRight(IGHV3.64$AA_FR1, 3)
-IGHV3.64.table <- table(IGHV3.64$population, IGHV3.64$Last3FR1)
-master.data$IGHV3.64_Last3FR1 <- IGHV3.64.table[, "AAS"]/rowSums(IGHV3.64.table) * 100
-
-IGHV3.64D <- full.data[full.data$Vgene == "IGHV3-64D", ]
-IGHV3.64D$Last3FR1 <- substrRight(IGHV3.64D$AA_FR1, 3)
-IGHV3.64D.table <- table(IGHV3.64D$population, IGHV3.64D$Last3FR1)
-master.data$IGHV3.64D_Last3FR1 <- IGHV3.64D.table[, "SAS"]/rowSums(IGHV3.64D.table) * 100
-
-IGHV3.66 <- full.data[full.data$Vgene == "IGHV3-66", ]
-IGHV3.66$Last3FR1 <- substrRight(IGHV3.66$AA_FR1, 3)
-IGHV3.66.table <- table(IGHV3.66$population, IGHV3.66$Last3FR1)
-master.data$IGHV3.66_Last3FR1 <- IGHV3.66.table[, "AAS"]/rowSums(IGHV3.66.table) * 100
-
-IGHV3.72 <- full.data[full.data$Vgene == "IGHV3-72", ]
-IGHV3.72$Last3FR1 <- substrRight(IGHV3.72$AA_FR1, 3)
-IGHV3.72.table <- table(IGHV3.72$population, IGHV3.72$Last3FR1)
-master.data$IGHV3.72_Last3FR1 <- IGHV3.72.table[, "AAS"]/rowSums(IGHV3.72.table) * 100
-
-IGHV3.73 <- full.data[full.data$Vgene == "IGHV3-73", ]
-IGHV3.73$Last3FR1 <- substrRight(IGHV3.73$AA_FR1, 3)
-IGHV3.73.table <- table(IGHV3.73$population, IGHV3.73$Last3FR1)
-master.data$IGHV3.73_Last3FR1 <- IGHV3.73.table[, "AAS"]/rowSums(IGHV3.73.table) * 100
-
-IGHV3.74 <- full.data[full.data$Vgene == "IGHV3-74", ]
-IGHV3.74$Last3FR1 <- substrRight(IGHV3.74$AA_FR1, 3)
-IGHV3.74.table <- table(IGHV3.74$population, IGHV3.74$Last3FR1)
-master.data$IGHV3.74_Last3FR1 <- IGHV3.74.table[, "AAS"]/rowSums(IGHV3.74.table) * 100
-
-IGHV4.4 <- full.data[full.data$Vgene == "IGHV4-4", ]
-IGHV4.4$Last3FR1 <- substrRight(IGHV4.4$AA_FR1, 3)
-IGHV4.4.table <- table(IGHV4.4$population, IGHV4.4$Last3FR1)
-master.data$IGHV4.4_Last3FR1 <- IGHV4.4.table[, "AVS"]/rowSums(IGHV4.4.table) * 100
-
-IGHV4.28 <- full.data[full.data$Vgene == "IGHV4-28", ]
-IGHV4.28$Last3FR1 <- substrRight(IGHV4.28$AA_FR1, 3)
-IGHV4.28.table <- table(IGHV4.28$population, IGHV4.28$Last3FR1)
-master.data$IGHV4.28_Last3FR1 <- IGHV4.28.table[, "AVS"]/rowSums(IGHV4.28.table) * 100
-
-IGHV4.30.2 <- full.data[full.data$Vgene == "IGHV4-30-2", ]
-IGHV4.30.2$Last3FR1 <- substrRight(IGHV4.30.2$AA_FR1, 3)
-IGHV4.30.2.table <- table(IGHV4.30.2$population, IGHV4.30.2$Last3FR1)
-master.data$IGHV4.30.2_Last3FR1 <- IGHV4.30.2.table[, "AVS"]/rowSums(IGHV4.30.2.table) * 100
-
-IGHV4.30.4 <- full.data[full.data$Vgene == "IGHV4-30-4", ]
-IGHV4.30.4$Last3FR1 <- substrRight(IGHV4.30.4$AA_FR1, 3)
-IGHV4.30.4.table <- table(IGHV4.30.4$population, IGHV4.30.4$Last3FR1)
-master.data$IGHV4.30.4_Last3FR1 <- IGHV4.30.4.table[, "TVS"]/rowSums(IGHV4.30.4.table) * 100
-
-IGHV4.31 <- full.data[full.data$Vgene == "IGHV4-31", ]
-IGHV4.31$Last3FR1 <- substrRight(IGHV4.31$AA_FR1, 3)
-IGHV4.31.table <- table(IGHV4.31$population, IGHV4.31$Last3FR1)
-master.data$IGHV4.31_Last3FR1 <- IGHV4.31.table[, "TVS"]/rowSums(IGHV4.31.table) * 100
-
-IGHV4.34 <- full.data[full.data$Vgene == "IGHV4-34", ]
-IGHV4.34$Last3FR1 <- substrRight(IGHV4.34$AA_FR1, 3)
-IGHV4.34.table <- table(IGHV4.34$population, IGHV4.34$Last3FR1)
-master.data$IGHV4.34_Last3FR1 <- IGHV4.34.table[, "AVY"]/rowSums(IGHV4.34.table) * 100
-
-IGHV4.38 <- full.data[full.data$Vgene == "IGHV4-38", ]
-IGHV4.38$Last3FR1 <- substrRight(IGHV4.38$AA_FR1, 3)
-IGHV4.38.table <- table(IGHV4.38$population, IGHV4.38$Last3FR1)
-master.data$IGHV4.38_Last3FR1 <- IGHV4.38.table[, "TVS"]/rowSums(IGHV4.38.table) * 100
-
-IGHV4.39 <- full.data[full.data$Vgene == "IGHV4-39", ]
-IGHV4.39$Last3FR1 <- substrRight(IGHV4.39$AA_FR1, 3)
-IGHV4.39.table <- table(IGHV4.39$population, IGHV4.39$Last3FR1)
-master.data$IGHV4.39_Last3FR1 <- IGHV4.39.table[, "TVS"]/rowSums(IGHV4.39.table) * 100
-
-IGHV4.59 <- full.data[full.data$Vgene == "IGHV4-59", ]
-IGHV4.59$Last3FR1 <- substrRight(IGHV4.59$AA_FR1, 3)
-IGHV4.59.table <- table(IGHV4.59$population, IGHV4.59$Last3FR1)
-master.data$IGHV4.59_Last3FR1 <- IGHV4.59.table[, "TVS"]/rowSums(IGHV4.59.table) * 100
-
-IGHV4.61 <- full.data[full.data$Vgene == "IGHV4-61", ]
-IGHV4.61$Last3FR1 <- substrRight(IGHV4.61$AA_FR1, 3)
-IGHV4.61.table <- table(IGHV4.61$population, IGHV4.61$Last3FR1)
-master.data$IGHV4.61_Last3FR1 <- IGHV4.61.table[, "TVS"]/rowSums(IGHV4.61.table) * 100
-
-IGHV5.10 <- full.data[full.data$Vgene == "IGHV5-10", ]
-IGHV5.10$Last3FR1 <- substrRight(IGHV5.10$AA_FR1, 3)
-IGHV5.10.table <- table(IGHV5.10$population, IGHV5.10$Last3FR1)
-master.data$IGHV5.10_Last3FR1 <- IGHV5.10.table[, "KGS"]/rowSums(IGHV5.10.table) * 100
-
-IGHV5.51 <- full.data[full.data$Vgene == "IGHV5-51", ]
-IGHV5.51$Last3FR1 <- substrRight(IGHV5.51$AA_FR1, 3)
-IGHV5.51.table <- table(IGHV5.51$population, IGHV5.51$Last3FR1)
-master.data$IGHV5.51_Last3FR1 <- IGHV5.51.table[, "KGS"]/rowSums(IGHV5.51.table) * 100
-
-IGHV6.1 <- full.data[full.data$Vgene == "IGHV6-1", ]
-IGHV6.1$Last3FR1 <- substrRight(IGHV6.1$AA_FR1, 3)
-IGHV6.1.table <- table(IGHV6.1$population, IGHV6.1$Last3FR1)
-master.data$IGHV6.1_Last3FR1 <- IGHV6.1.table[, "AIS"]/rowSums(IGHV6.1.table) * 100
-
-IGHV7.4.1 <- full.data[full.data$Vgene == "IGHV7-4-1", ]
-IGHV7.4.1$Last3FR1 <- substrRight(IGHV7.4.1$AA_FR1, 3)
-IGHV7.4.1.table <- table(IGHV7.4.1$population, IGHV7.4.1$Last3FR1)
-master.data$IGHV7.4.1_Last3FR1 <- IGHV7.4.1.table[, "KAS"]/rowSums(IGHV7.4.1.table) * 100
+# # IGHV1.2 <- full.data[full.data$Vgene == "IGHV1-2", ]
+# # IGHV1.2$Last3FR1 <- substrRight(IGHV1.2$AA_FR1, 3)
+# # IGHV1.2.table <- table(IGHV1.2$population, IGHV1.2$Last3FR1)
+# # master.data$IGHV1.2_Last3FR1 <- IGHV1.2.table[, "KAS"]/rowSums(IGHV1.2.table) * 100
+# #
+# # IGHV1.3 <- full.data[full.data$Vgene == "IGHV1-3", ]
+# # IGHV1.3$Last3FR1 <- substrRight(IGHV1.3$AA_FR1, 3)
+# # IGHV1.3.table <- table(IGHV1.3$population, IGHV1.3$Last3FR1)
+# # master.data$IGHV1.3_Last3FR1 <- IGHV1.3.table[, "KAS"]/rowSums(IGHV1.3.table) * 100
+#
+# # IGHV1.8 <- full.data[full.data$Vgene == "IGHV1-8", ]
+# # IGHV1.8$Last3FR1 <- substrRight(IGHV1.8$AA_FR1, 3)
+# # IGHV1.8.table <- table(IGHV1.8$population, IGHV1.8$Last3FR1)
+# # master.data$IGHV1.8_Last3FR1 <- IGHV1.8.table[, "KAS"]/rowSums(IGHV1.8.table) * 100
+#
+# IGHV1.18 <- full.data[full.data$Vgene == "IGHV1-18", ]
+# IGHV1.18$Last3FR1 <- substrRight(IGHV1.18$AA_FR1, 3)
+# IGHV1.18.table <- table(IGHV1.18$population, IGHV1.18$Last3FR1)
+# master.data$IGHV1.18_Last3FR1 <- IGHV1.18.table[, "KAS"]/rowSums(IGHV1.18.table) * 100
+#
+# # IGHV1.24 <- full.data[full.data$Vgene == "IGHV1-24", ]
+# # IGHV1.24$Last3FR1 <- substrRight(IGHV1.24$AA_FR1, 3)
+# # IGHV1.24.table <- table(IGHV1.24$population, IGHV1.24$Last3FR1)
+# # master.data$IGHV1.24_Last3FR1 <- IGHV1.24.table[, "KVS"]/rowSums(IGHV1.24.table) * 100
+# #
+# # IGHV1.45 <- full.data[full.data$Vgene == "IGHV1-45", ]
+# # IGHV1.45$Last3FR1 <- substrRight(IGHV1.45$AA_FR1, 3)
+# # IGHV1.45.table <- table(IGHV1.45$population, IGHV1.45$Last3FR1)
+# # master.data$IGHV1.45_Last3FR1 <- IGHV1.45.table[, "KAS"]/rowSums(IGHV1.45.table) * 100
+# #
+# # IGHV1.46 <- full.data[full.data$Vgene == "IGHV1-46", ]
+# # IGHV1.46$Last3FR1 <- substrRight(IGHV1.46$AA_FR1, 3)
+# # IGHV1.46.table <- table(IGHV1.46$population, IGHV1.46$Last3FR1)
+# # master.data$IGHV1.46_Last3FR1 <- IGHV1.46.table[, "KAS"]/rowSums(IGHV1.46.table) * 100
+#
+# IGHV1.58 <- full.data[full.data$Vgene == "IGHV1-58", ]
+# IGHV1.58$Last3FR1 <- substrRight(IGHV1.58$AA_FR1, 3)
+# IGHV1.58.table <- table(IGHV1.58$population, IGHV1.58$Last3FR1)
+# master.data$IGHV1.58_Last3FR1 <- IGHV1.58.table[, "KAS"]/rowSums(IGHV1.58.table) * 100
+#
+# IGHV1.69 <- full.data[full.data$Vgene == "IGHV1-69", ]
+# IGHV1.69$Last3FR1 <- substrRight(IGHV1.69$AA_FR1, 3)
+# IGHV1.69.table <- table(IGHV1.69$population, IGHV1.69$Last3FR1)
+# master.data$IGHV1.69_Last3FR1 <- IGHV1.69.table[, "KAS"]/rowSums(IGHV1.69.table) * 100
+#
+# # IGHV2.5 <- full.data[full.data$Vgene == "IGHV2-5", ]
+# # IGHV2.5$Last3FR1 <- substrRight(IGHV2.5$AA_FR1, 3)
+# # IGHV2.5.table <- table(IGHV2.5$population, IGHV2.5$Last3FR1)
+# # master.data$IGHV2.5_Last3FR1 <- IGHV2.5.table[, "TFS"]/rowSums(IGHV2.5.table) * 100
+# #
+# # IGHV2.26 <- full.data[full.data$Vgene == "IGHV2-26", ]
+# # IGHV2.26$Last3FR1 <- substrRight(IGHV2.26$AA_FR1, 3)
+# # IGHV2.26.table <- table(IGHV2.26$population, IGHV2.26$Last3FR1)
+# # master.data$IGHV2.26_Last3FR1 <- IGHV2.26.table[, "TVS"]/rowSums(IGHV2.26.table) * 100
+# #
+# # IGHV2.70 <- full.data[full.data$Vgene == "IGHV2-70", ]
+# # IGHV2.70$Last3FR1 <- substrRight(IGHV2.70$AA_FR1, 3)
+# # IGHV2.70.table <- table(IGHV2.70$population, IGHV2.70$Last3FR1)
+# # master.data$IGHV2.70_Last3FR1 <- IGHV2.70.table[, "TFS"]/rowSums(IGHV2.70.table) * 100
+#
+# IGHV3.7 <- full.data[full.data$Vgene == "IGHV3-7", ]
+# IGHV3.7$Last3FR1 <- substrRight(IGHV3.7$AA_FR1, 3)
+# IGHV3.7.table <- table(IGHV3.7$population, IGHV3.7$Last3FR1)
+# master.data$IGHV3.7_Last3FR1 <- IGHV3.7.table[, "AAS"]/rowSums(IGHV3.7.table) * 100
+#
+# IGHV3.9 <- full.data[full.data$Vgene == "IGHV3-9", ]
+# IGHV3.9$Last3FR1 <- substrRight(IGHV3.9$AA_FR1, 3)
+# IGHV3.9.table <- table(IGHV3.9$population, IGHV3.9$Last3FR1)
+# master.data$IGHV3.9_Last3FR1 <- IGHV3.9.table[, "AAS"]/rowSums(IGHV3.9.table) * 100
+#
+# IGHV3.11 <- full.data[full.data$Vgene == "IGHV3-11", ]
+# IGHV3.11$Last3FR1 <- substrRight(IGHV3.11$AA_FR1, 3)
+# IGHV3.11.table <- table(IGHV3.11$population, IGHV3.11$Last3FR1)
+# master.data$IGHV3.11_Last3FR1 <- IGHV3.11.table[, "AAS"]/rowSums(IGHV3.11.table) * 100
+#
+# # IGHV3.13 <- full.data[full.data$Vgene == "IGHV3-13", ]
+# # IGHV3.13$Last3FR1 <- substrRight(IGHV3.13$AA_FR1, 3)
+# # IGHV3.13.table <- table(IGHV3.13$population, IGHV3.13$Last3FR1)
+# # master.data$IGHV3.13_Last3FR1 <- IGHV3.13.table[, "AAS"]/rowSums(IGHV3.13.table) * 100
+# #
+# # IGHV3.15 <- full.data[full.data$Vgene == "IGHV3-15", ]
+# # IGHV3.15$Last3FR1 <- substrRight(IGHV3.15$AA_FR1, 3)
+# # IGHV3.15.table <- table(IGHV3.15$population, IGHV3.15$Last3FR1)
+# # master.data$IGHV3.15_Last3FR1 <- IGHV3.15.table[, "AAS"]/rowSums(IGHV3.15.table) * 100
+# #
+# # IGHV3.20 <- full.data[full.data$Vgene == "IGHV3-20", ]
+# # IGHV3.20$Last3FR1 <- substrRight(IGHV3.20$AA_FR1, 3)
+# # IGHV3.20.table <- table(IGHV3.20$population, IGHV3.20$Last3FR1)
+# # master.data$IGHV3.20_Last3FR1 <- IGHV3.20.table[, "AAS"]/rowSums(IGHV3.20.table) * 100
+# #
+# # IGHV3.21 <- full.data[full.data$Vgene == "IGHV3-21", ]
+# # IGHV3.21$Last3FR1 <- substrRight(IGHV3.21$AA_FR1, 3)
+# # IGHV3.21.table <- table(IGHV3.21$population, IGHV3.21$Last3FR1)
+# # master.data$IGHV3.21_Last3FR1 <- IGHV3.21.table[, "AAS"]/rowSums(IGHV3.21.table) * 100
+#
+# IGHV3.23 <- full.data[full.data$Vgene == "IGHV3-23", ]
+# IGHV3.23$Last3FR1 <- substrRight(IGHV3.23$AA_FR1, 3)
+# IGHV3.23.table <- table(IGHV3.23$population, IGHV3.23$Last3FR1)
+# master.data$IGHV3.23_Last3FR1 <- IGHV3.23.table[, "AAS"]/rowSums(IGHV3.23.table) * 100
+#
+# # IGHV3.23D <- full.data[full.data$Vgene == "IGHV3-23D", ]
+# # IGHV3.23D$Last3FR1 <- substrRight(IGHV3.23D$AA_FR1, 3)
+# # IGHV3.23D.table <- table(IGHV3.23D$population, IGHV3.23D$Last3FR1)
+# # master.data$IGHV3.23D_Last3FR1 <- IGHV3.23D.table[, "AAS"]/rowSums(IGHV3.23D.table) * 100
+# #
+# # IGHV3.30 <- full.data[full.data$Vgene == "IGHV3-30", ]
+# # IGHV3.30$Last3FR1 <- substrRight(IGHV3.30$AA_FR1, 3)
+# # IGHV3.30.table <- table(IGHV3.30$population, IGHV3.30$Last3FR1)
+# # master.data$IGHV3.30_Last3FR1 <- IGHV3.30.table[, "AAS"]/rowSums(IGHV3.30.table) * 100
+# #
+# # IGHV3.30.3 <- full.data[full.data$Vgene == "IGHV3-30-3", ]
+# # IGHV3.30.3$Last3FR1 <- substrRight(IGHV3.30.3$AA_FR1, 3)
+# # IGHV3.30.3.table <- table(IGHV3.30.3$population, IGHV3.30.3$Last3FR1)
+# # master.data$IGHV3.30.3_Last3FR1 <- IGHV3.30.3.table[, "AAS"]/rowSums(IGHV3.30.3.table) * 100
+# #
+# # IGHV3.33 <- full.data[full.data$Vgene == "IGHV3-33", ]
+# # IGHV3.33$Last3FR1 <- substrRight(IGHV3.33$AA_FR1, 3)
+# # IGHV3.33.table <- table(IGHV3.33$population, IGHV3.33$Last3FR1)
+# # master.data$IGHV3.33_Last3FR1 <- IGHV3.33.table[, "AAS"]/rowSums(IGHV3.33.table) * 100
+# #
+# # IGHV3.43 <- full.data[full.data$Vgene == "IGHV3-43", ]
+# # IGHV3.43$Last3FR1 <- substrRight(IGHV3.43$AA_FR1, 3)
+# # IGHV3.43.table <- table(IGHV3.43$population, IGHV3.43$Last3FR1)
+# # master.data$IGHV3.43_Last3FR1 <- IGHV3.43.table[, "AAS"]/rowSums(IGHV3.43.table) * 100
+# #
+# # IGHV3.43D <- full.data[full.data$Vgene == "IGHV3-43D", ]
+# # IGHV3.43D$Last3FR1 <- substrRight(IGHV3.43D$AA_FR1, 3)
+# # IGHV3.43D.table <- table(IGHV3.43D$population, IGHV3.43D$Last3FR1)
+# # master.data$IGHV3.43D_Last3FR1 <- IGHV3.43D.table[, "AAS"]/rowSums(IGHV3.43D.table) * 100
+# #
+# # IGHV3.48 <- full.data[full.data$Vgene == "IGHV3-48", ]
+# # IGHV3.48$Last3FR1 <- substrRight(IGHV3.48$AA_FR1, 3)
+# # IGHV3.48.table <- table(IGHV3.48$population, IGHV3.48$Last3FR1)
+# # master.data$IGHV3.48_Last3FR1 <- IGHV3.48.table[, "AAS"]/rowSums(IGHV3.48.table) * 100
+#
+# # IGHV3.49 <- full.data[full.data$Vgene == "IGHV3-49", ]
+# # IGHV3.49$Last3FR1 <- substrRight(IGHV3.49$AA_FR1, 3)
+# # IGHV3.49.table <- table(IGHV3.49$population, IGHV3.49$Last3FR1)
+# # master.data$IGHV3.49_Last3FR1 <- IGHV3.49.table[, "TAS"]/rowSums(IGHV3.49.table) * 100
+# #
+# # IGHV3.53 <- full.data[full.data$Vgene == "IGHV3-53", ]
+# # IGHV3.53$Last3FR1 <- substrRight(IGHV3.53$AA_FR1, 3)
+# # IGHV3.53.table <- table(IGHV3.53$population, IGHV3.53$Last3FR1)
+# # master.data$IGHV3.53_Last3FR1 <- IGHV3.53.table[, "AAS"]/rowSums(IGHV3.53.table) * 100
+# #
+# # IGHV3.64 <- full.data[full.data$Vgene == "IGHV3-64", ]
+# # IGHV3.64$Last3FR1 <- substrRight(IGHV3.64$AA_FR1, 3)
+# # IGHV3.64.table <- table(IGHV3.64$population, IGHV3.64$Last3FR1)
+# # master.data$IGHV3.64_Last3FR1 <- IGHV3.64.table[, "AAS"]/rowSums(IGHV3.64.table) * 100
+# #
+# # IGHV3.64D <- full.data[full.data$Vgene == "IGHV3-64D", ]
+# # IGHV3.64D$Last3FR1 <- substrRight(IGHV3.64D$AA_FR1, 3)
+# # IGHV3.64D.table <- table(IGHV3.64D$population, IGHV3.64D$Last3FR1)
+# # master.data$IGHV3.64D_Last3FR1 <- IGHV3.64D.table[, "SAS"]/rowSums(IGHV3.64D.table) * 100
+# #
+# # IGHV3.66 <- full.data[full.data$Vgene == "IGHV3-66", ]
+# # IGHV3.66$Last3FR1 <- substrRight(IGHV3.66$AA_FR1, 3)
+# # IGHV3.66.table <- table(IGHV3.66$population, IGHV3.66$Last3FR1)
+# # master.data$IGHV3.66_Last3FR1 <- IGHV3.66.table[, "AAS"]/rowSums(IGHV3.66.table) * 100
+# #
+# # IGHV3.72 <- full.data[full.data$Vgene == "IGHV3-72", ]
+# # IGHV3.72$Last3FR1 <- substrRight(IGHV3.72$AA_FR1, 3)
+# # IGHV3.72.table <- table(IGHV3.72$population, IGHV3.72$Last3FR1)
+# # master.data$IGHV3.72_Last3FR1 <- IGHV3.72.table[, "AAS"]/rowSums(IGHV3.72.table) * 100
+# #
+# # IGHV3.73 <- full.data[full.data$Vgene == "IGHV3-73", ]
+# # IGHV3.73$Last3FR1 <- substrRight(IGHV3.73$AA_FR1, 3)
+# # IGHV3.73.table <- table(IGHV3.73$population, IGHV3.73$Last3FR1)
+# # master.data$IGHV3.73_Last3FR1 <- IGHV3.73.table[, "AAS"]/rowSums(IGHV3.73.table) * 100
+# #
+# # IGHV3.74 <- full.data[full.data$Vgene == "IGHV3-74", ]
+# # IGHV3.74$Last3FR1 <- substrRight(IGHV3.74$AA_FR1, 3)
+# # IGHV3.74.table <- table(IGHV3.74$population, IGHV3.74$Last3FR1)
+# # master.data$IGHV3.74_Last3FR1 <- IGHV3.74.table[, "AAS"]/rowSums(IGHV3.74.table) * 100
+#
+# IGHV4.4 <- full.data[full.data$Vgene == "IGHV4-4", ]
+# IGHV4.4$Last3FR1 <- substrRight(IGHV4.4$AA_FR1, 3)
+# IGHV4.4.table <- table(IGHV4.4$population, IGHV4.4$Last3FR1)
+# master.data$IGHV4.4_Last3FR1 <- IGHV4.4.table[, "AVS"]/rowSums(IGHV4.4.table) * 100
+#
+# # IGHV4.28 <- full.data[full.data$Vgene == "IGHV4-28", ]
+# # IGHV4.28$Last3FR1 <- substrRight(IGHV4.28$AA_FR1, 3)
+# # IGHV4.28.table <- table(IGHV4.28$population, IGHV4.28$Last3FR1)
+# # master.data$IGHV4.28_Last3FR1 <- IGHV4.28.table[, "AVS"]/rowSums(IGHV4.28.table) * 100
+# #
+# # IGHV4.30.2 <- full.data[full.data$Vgene == "IGHV4-30-2", ]
+# # IGHV4.30.2$Last3FR1 <- substrRight(IGHV4.30.2$AA_FR1, 3)
+# # IGHV4.30.2.table <- table(IGHV4.30.2$population, IGHV4.30.2$Last3FR1)
+# # master.data$IGHV4.30.2_Last3FR1 <- IGHV4.30.2.table[, "AVS"]/rowSums(IGHV4.30.2.table) * 100
+# #
+# # IGHV4.30.4 <- full.data[full.data$Vgene == "IGHV4-30-4", ]
+# # IGHV4.30.4$Last3FR1 <- substrRight(IGHV4.30.4$AA_FR1, 3)
+# # IGHV4.30.4.table <- table(IGHV4.30.4$population, IGHV4.30.4$Last3FR1)
+# # master.data$IGHV4.30.4_Last3FR1 <- IGHV4.30.4.table[, "TVS"]/rowSums(IGHV4.30.4.table) * 100
+# #
+# # IGHV4.31 <- full.data[full.data$Vgene == "IGHV4-31", ]
+# # IGHV4.31$Last3FR1 <- substrRight(IGHV4.31$AA_FR1, 3)
+# # IGHV4.31.table <- table(IGHV4.31$population, IGHV4.31$Last3FR1)
+# # master.data$IGHV4.31_Last3FR1 <- IGHV4.31.table[, "TVS"]/rowSums(IGHV4.31.table) * 100
+#
+# IGHV4.34 <- full.data[full.data$Vgene == "IGHV4-34", ]
+# IGHV4.34$Last3FR1 <- substrRight(IGHV4.34$AA_FR1, 3)
+# IGHV4.34.table <- table(IGHV4.34$population, IGHV4.34$Last3FR1)
+# master.data$IGHV4.34_Last3FR1 <- IGHV4.34.table[, "AVY"]/rowSums(IGHV4.34.table) * 100
+#
+# # IGHV4.38 <- full.data[full.data$Vgene == "IGHV4-38", ]
+# # IGHV4.38$Last3FR1 <- substrRight(IGHV4.38$AA_FR1, 3)
+# # IGHV4.38.table <- table(IGHV4.38$population, IGHV4.38$Last3FR1)
+# # master.data$IGHV4.38_Last3FR1 <- IGHV4.38.table[, "TVS"]/rowSums(IGHV4.38.table) * 100
+# #
+# # IGHV4.39 <- full.data[full.data$Vgene == "IGHV4-39", ]
+# # IGHV4.39$Last3FR1 <- substrRight(IGHV4.39$AA_FR1, 3)
+# # IGHV4.39.table <- table(IGHV4.39$population, IGHV4.39$Last3FR1)
+# # master.data$IGHV4.39_Last3FR1 <- IGHV4.39.table[, "TVS"]/rowSums(IGHV4.39.table) * 100
+#
+# IGHV4.59 <- full.data[full.data$Vgene == "IGHV4-59", ]
+# IGHV4.59$Last3FR1 <- substrRight(IGHV4.59$AA_FR1, 3)
+# IGHV4.59.table <- table(IGHV4.59$population, IGHV4.59$Last3FR1)
+# master.data$IGHV4.59_Last3FR1 <- IGHV4.59.table[, "TVS"]/rowSums(IGHV4.59.table) * 100
+#
+# # IGHV4.61 <- full.data[full.data$Vgene == "IGHV4-61", ]
+# # IGHV4.61$Last3FR1 <- substrRight(IGHV4.61$AA_FR1, 3)
+# # IGHV4.61.table <- table(IGHV4.61$population, IGHV4.61$Last3FR1)
+# # master.data$IGHV4.61_Last3FR1 <- IGHV4.61.table[, "TVS"]/rowSums(IGHV4.61.table) * 100
+# #
+# # IGHV5.10 <- full.data[full.data$Vgene == "IGHV5-10", ]
+# # IGHV5.10$Last3FR1 <- substrRight(IGHV5.10$AA_FR1, 3)
+# # IGHV5.10.table <- table(IGHV5.10$population, IGHV5.10$Last3FR1)
+# # master.data$IGHV5.10_Last3FR1 <- IGHV5.10.table[, "KGS"]/rowSums(IGHV5.10.table) * 100
+#
+# IGHV5.51 <- full.data[full.data$Vgene == "IGHV5-51", ]
+# IGHV5.51$Last3FR1 <- substrRight(IGHV5.51$AA_FR1, 3)
+# IGHV5.51.table <- table(IGHV5.51$population, IGHV5.51$Last3FR1)
+# master.data$IGHV5.51_Last3FR1 <- IGHV5.51.table[, "KGS"]/rowSums(IGHV5.51.table) * 100
+#
+# # IGHV6.1 <- full.data[full.data$Vgene == "IGHV6-1", ]
+# # IGHV6.1$Last3FR1 <- substrRight(IGHV6.1$AA_FR1, 3)
+# # IGHV6.1.table <- table(IGHV6.1$population, IGHV6.1$Last3FR1)
+# # master.data$IGHV6.1_Last3FR1 <- IGHV6.1.table[, "AIS"]/rowSums(IGHV6.1.table) * 100
+# #
+# # IGHV7.4.1 <- full.data[full.data$Vgene == "IGHV7-4-1", ]
+# # IGHV7.4.1$Last3FR1 <- substrRight(IGHV7.4.1$AA_FR1, 3)
+# # IGHV7.4.1.table <- table(IGHV7.4.1$population, IGHV7.4.1$Last3FR1)
+# # master.data$IGHV7.4.1_Last3FR1 <- IGHV7.4.1.table[, "KAS"]/rowSums(IGHV7.4.1.table) * 100
 
 
 write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
