@@ -1,4 +1,4 @@
-3.72# location input requires file location of the grouped lineage file from IgSeq
+# location input requires file location of the grouped lineage file from IgSeq
 
 seqanalysis <- function(location) {
     library(RColorBrewer)
@@ -25,7 +25,7 @@ seqanalysis <- function(location) {
     }
 
     # establish input and output file locations
-    location <- '/Users/cmtipto/Desktop/Test/908'
+    #location <- '/Users/cmtipto/Desktop/Test/908'
     location2 <- location
     #location <- paste0(location, "/IgSeq")
     # file.dir <- paste0(location, '/lineageOutput/withIdenticals/') file.x <<-
@@ -111,7 +111,12 @@ seqanalysis <- function(location) {
 
     # call function to change column names in the specified file changelin(file.x)
 
+    full.data$Sample <- full.data$population
 
+    if (str_count(full.data$population[1],"\\_") == 4){
+    sample.info <- str_split_fixed(full.data$population, "_", 5)
+    full.data$population <- paste0(sample.info[,3], '_', sample.info[,4])
+    }
 
     # determine number of populations
     poplist <- levels(as.factor(full.data$population))
@@ -119,14 +124,11 @@ seqanalysis <- function(location) {
     print(paste0("Analyzing ", numpops, " populations of cells:"))
     poplist
 
-
+    samplelist <- levels(as.factor(full.data$Sample))
     # poplist <- list() for (p in 1:numpops){ file.merged <- paste0(location,
     # '/mergeOutput') file.merged.list <- list.dirs(file.merged) j <- sub('.*/', '',
     # file.merged.list[p+1]) #jx <- sub('Run[0-9][0-9]_', '', j) jy <-
     # sub('_S[0-9]+', '', j) poplist[p] <- jy }
-
-
-
 
 
     # make data frame that will hold population names and info
@@ -139,7 +141,7 @@ seqanalysis <- function(location) {
     # Make Grouped Lineage Data Frame
 
 
-    non.single <- full.data[full.data$Singleton == FALSE, ]
+
 
     # Sample.df <- table(full.data$Run, full.data$Lane, full.data$Pop, full.data$Tissue)
     # Sample.df <- melt(Sample.df)
@@ -147,16 +149,27 @@ seqanalysis <- function(location) {
     # Sample.df <- Sample.df[Sample.df$value != 0,]
     # colnames(Sample.df) <- c('Run', 'Lane', 'Pop', 'Tissue', 'Sequences')
 
-    lineage.data <- non.single[, c("population", "lineageID", "Vgene")]
-    table.x <- table(lineage.data$lineageID, lineage.data$population)
-    lineages.union <- as.data.frame.matrix(table.x)
 
+    non.single <- full.data[full.data$Singleton == FALSE, ]
+
+    lineage.data <- non.single[, c("population", "lineageID", "Vgene")]
+    table.pop <- table(lineage.data$lineageID, lineage.data$population)
+    table.vgene <- table(lineage.data$lineageID, lineage.data$Vgene)
+    pop.df <- cbind(rownames(table.pop), as.data.frame.matrix(table.pop, row.names=NULL))
+    colnames(pop.df)[1] <- "LineageID"
+    v.df <- cbind(rownames(table.vgene), as.data.frame.matrix(table.vgene, row.names=NULL))
+    colnames(v.df)[1] <- "LineageID"
+    table.vgene.melt <- melt(v.df, key = LineageID)
+    v.melt <- table.vgene.melt[table.vgene.melt$value!=0,]
+    lineages.union <- cbind(v.melt$variable, pop.df)
+    colnames(lineages.union)[1] <- "Vgene"
 
     melt.x <- melt(lineages.union)
     filtered.melt.x <- melt.x[melt.x$value != 0, ]
     lineage.table <- table(filtered.melt.x$variable)
     melt.lineage.table <- as.data.frame(melt(lineage.table))
-    colnames(melt.lineage.table)[2] <- "Lineages"
+    colnames(melt.lineage.table) <- c("Population", "Lineages")
+
 
     vtable <- table(full.data$population, full.data$Vgene)
     vperc <- prop.table(vtable) * 100
@@ -165,9 +178,10 @@ seqanalysis <- function(location) {
     jperc <- prop.table(jtable) * 100
 
     seqs <- as.data.frame(table(non.single$population))
+    seqs <- cbind(Sample = samplelist, seqs)
     master.data <- cbind(seqs, melt.lineage.table$Lineages)
 
-    colnames(master.data) <- c("Population", "Sequences (Non-Single)", "Lineages")
+    colnames(master.data) <- c("Sample", "Population", "Sequences (Non-Single)", "Lineages")
     #master.data <- cbind(Sample.df, master.data)
 
     #if (length(levels(factor(full.data$Tissue))) != 1) {
@@ -195,11 +209,11 @@ seqanalysis <- function(location) {
 
     # Add clonality values for each population into a new column
 
-
+    lin.df <- lineages.union[,3:ncol(lineages.union)]
     clonality.df <- data.frame()
 
     for (k in 1:numpops) {
-        clonality.df[k, 1] <- clon(lineages.union, col = k)
+        clonality.df[k, 1] <- clon(lin.df, col = k)
     }
 
     colnames(clonality.df)[1] <- "Clonality"
@@ -824,37 +838,21 @@ master.data <- cbind(master.data, gene.info)
 # # master.data$IGHV7.4.1_Last3FR1 <- IGHV7.4.1.table[, "KAS"]/rowSums(IGHV7.4.1.table) * 100
 
 
-write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
-
-}
-
-
-
-
-
-
-
-##############################
-
-
-
-
-
 
     # make a data frame with percent of matching clones in each
 
     percof.df <- data.frame()
 
     for (m in 1:numpops) {
-        df.x <- filter(lineages.union, lineages.union[[m + 4]] > 0)
+        df.x <- filter(lineages.union, lineages.union[[m + 2]] > 0)
         lin.x <- nrow(df.x)
         for (n in 1:numpops) {
-            df.x_y <- filter(df.x, df.x[[n + 4]] > 0)
+            df.x_y <- filter(df.x, df.x[[n + 2]] > 0)
             lin.x_y <- nrow(df.x_y)
             perc.x_y <- lin.x_y/lin.x * 100
-            percof.full.data[m, n] <- round(perc.x_y, 2)
+            percof.df[m, n] <- round(perc.x_y, 2)
         }
-        colnames(percof.df)[m] <- colnames(lineages.union)[m + 4]
+        colnames(percof.df)[m] <- colnames(lineages.union)[m + 2]
     }
 
     # rename columns
@@ -866,9 +864,10 @@ write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names
     master.data <- cbind(master.data, percof.df)
 
 
+
     # Calculate the Morisita index for each pair of samples into a new matrix
 
-    pops.df <- lineages.union[, 5:ncol(lineages.union)]
+    pops.df <- lineages.union[, 3:ncol(lineages.union)]
     mor <- niche.overlap(pops.df, method = c("morisita"))
     mor.mat <- as.matrix(round(mor, 3))
     for (i in 1:numpops) {
@@ -889,7 +888,14 @@ write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names
     master.data <- cbind(master.data, mor.mat)
 
 
+    write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
+    }
 
+
+
+
+
+###############################
 
     # Calculate the Percent of Each Isotype
 
