@@ -25,14 +25,14 @@ seqanalysis <- function(location) {
     }
 
     # establish input and output file locations
-    #location <- '/Users/cmtipto/Desktop/Test/908'
+    location <- '/Users/cmtipto/Desktop/Test/999'
     location2 <- location
     #location <- paste0(location, "/IgSeq")
     # file.dir <- paste0(location, '/lineageOutput/withIdenticals/') file.x <<-
     # paste0(file.dir, 'GROUPED_LINEAGE_COUNTS.txt')
-    file.out <- paste0(location, "/CT_Sequencing_Analysis/")
+    file.out <- paste0(location, "/CT_Sequencing_Analysis2/")
     master.out <- paste0(file.out, "MasterData_", sub(".*/", "", location2), ".txt")
-    dir.create(file.path(location, "/CT_Sequencing_Analysis"), showWarnings = FALSE)
+    dir.create(file.path(location, "/CT_Sequencing_Analysis2"), showWarnings = FALSE)
     subject <- sub(".*/", "", location2)
     dblocation <- list.files(location, pattern = "\\.db$")
     dbfile <- paste0(location, "/", dblocation[1])
@@ -113,15 +113,26 @@ seqanalysis <- function(location) {
 
     full.data$Sample <- full.data$population
 
+
+
     if (str_count(full.data$population[1],"\\_") == 4){
     sample.info <- str_split_fixed(full.data$population, "_", 5)
     full.data$population <- paste0(sample.info[,3], '_', sample.info[,4])
     }
 
+    full.data$General_Population <- full.data$population
+
     # determine number of populations
     poplist <- levels(as.factor(full.data$population))
     numpops <- length(poplist)
-    print(paste0("Analyzing ", numpops, " populations of cells:"))
+    samplelist <- levels(as.factor(full.data$Sample))
+    numsamples <- length(samplelist)
+    if (numpops != numsamples){
+        full.data$population <- full.data$Sample
+    }
+
+
+    print(paste0("Analyzing ", numsamples, " populations of cells:"))
     poplist
 
     samplelist <- levels(as.factor(full.data$Sample))
@@ -212,7 +223,7 @@ seqanalysis <- function(location) {
     lin.df <- lineages.union[,3:ncol(lineages.union)]
     clonality.df <- data.frame()
 
-    for (k in 1:numpops) {
+    for (k in 1:numsamples) {
         clonality.df[k, 1] <- clon(lin.df, col = k)
     }
 
@@ -232,7 +243,7 @@ seqanalysis <- function(location) {
 
     iso.info <- data.frame()
 
-    for (n in 1:numpops) {
+    for (n in 1:numsamples) {
         Ig <- full.data[full.data$isotype != "U", ]
         IgG <- full.data[full.data$isotype == "G", ]
         IgA <- full.data[full.data$isotype == "A", ]
@@ -299,7 +310,7 @@ seqanalysis <- function(location) {
 
     nonsingle.iso.info <- data.frame()
 
-    for (n in 1:numpops) {
+    for (n in 1:numsamples) {
         Ig <- non.single[non.single$isotype != "U", ]
         IgG <- non.single[non.single$isotype == "G", ]
         IgA <- non.single[non.single$isotype == "A", ]
@@ -409,7 +420,7 @@ full.data$FR3_NonsilentMutation_Rate <- full.data$FR3_NonsilentMutations / full.
 
 extended.mut.info <- data.frame()
 
-for (n in 1:numpops) {
+for (n in 1:numsamples) {
     df.em <- full.data[full.data$population == poplist[n], ]
     extended.mut.info[n, 1] <- round(mean(df.em$V_SilentMutation_Rate, na.rm = TRUE), 2)
     extended.mut.info[n, 2] <- round(mean(df.em$V_NonsilentMutation_Rate, na.rm = TRUE), 2)
@@ -451,14 +462,17 @@ for (n in 1:numpops) {
 
     V434$AVY <- substrRight(V434$AA_FR1, 3)
     AVY.table <- table(V434$population, V434$AVY)
+    if (numsamples == nrow(AVY.table)){
     master.data$AVY_perc <- AVY.table[, "AVY"]/rowSums(AVY.table) * 100
-
+} else {
+    master.data$AVY_perc <- "N/A"
+}
 
 #Calculate the percent of each VH gene and JH gene
 
     gene.info <- data.frame()
 
-    for (n in 1:numpops) {
+    for (n in 1:numsamples) {
         df.popgenes <- full.data[full.data$population == poplist[n], ]
         IGHV1.2 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-2', ]
         IGHV1.3 <- df.popgenes[df.popgenes$Vgene == 'IGHV1-3', ]
@@ -843,10 +857,10 @@ master.data <- cbind(master.data, gene.info)
 
     percof.df <- data.frame()
 
-    for (m in 1:numpops) {
+    for (m in 1:numsamples) {
         df.x <- filter(lineages.union, lineages.union[[m + 2]] > 0)
         lin.x <- nrow(df.x)
-        for (n in 1:numpops) {
+        for (n in 1:numsamples) {
             df.x_y <- filter(df.x, df.x[[n + 2]] > 0)
             lin.x_y <- nrow(df.x_y)
             perc.x_y <- lin.x_y/lin.x * 100
@@ -856,7 +870,7 @@ master.data <- cbind(master.data, gene.info)
     }
 
     # rename columns
-    for (l in 1:numpops) {
+    for (l in 1:numsamples) {
         colnames(percof.df)[l] <- paste0("Percent_Matching_with_", colnames(percof.df)[l])
     }
 
@@ -870,14 +884,14 @@ master.data <- cbind(master.data, gene.info)
     pops.df <- lineages.union[, 3:ncol(lineages.union)]
     mor <- niche.overlap(pops.df, method = c("morisita"))
     mor.mat <- as.matrix(round(mor, 3))
-    for (i in 1:numpops) {
+    for (i in 1:numsamples) {
         mor.mat[i, i] <- 1
     }
 
     # rename columns
 
     mor.df <- as.data.frame(mor.mat)
-    for (l in 1:(numpops)) {
+    for (l in 1:(numsamples)) {
         colnames(mor.mat)[l] <- paste0("MI_", colnames(mor.mat)[l])
     }
 
@@ -887,6 +901,89 @@ master.data <- cbind(master.data, gene.info)
 
     master.data <- cbind(master.data, mor.mat)
 
+clone.mut <- data.frame()
+for (i in 1:numsamples){
+    df1 <- non.single[non.single$Sample == samplelist[i],]
+    df.lineagedata <- summaryBy(V_Mutations ~ lineageID, data = df1, FUN = list(mean, max, min, median, sd))
+    clone.mut[i,1] <- samplelist[i]
+    clone.mut[i,2] <- round(mean(df.lineagedata$V_Mutations.mean),2)
+    clone.mut[i,3] <- median(df.lineagedata$V_Mutations.median)
+    clone.mut[i,4] <- round(mean(df.lineagedata$V_Mutations.min), 2)
+    }
+    colnames(clone.mut) <- c('Sample', 'Mean Clonal Mutation', 'Median Clonal Mutation', 'Mean Trunk Length')
+
+    master.data <- cbind(master.data, clone.mut[,c(2:4)])
+
+clone.mut.iso <- data.frame()
+for (i in 1:numsamples) {
+    Ig <- non.single[non.single$isotype != "U", ]
+    IgG <- non.single[non.single$isotype == "G", ]
+    IgA <- non.single[non.single$isotype == "A", ]
+    IgM <- non.single[non.single$isotype == "M", ]
+    IgE <- non.single[non.single$isotype == "E", ]
+
+    Ig <- Ig[Ig$Sample == samplelist[i], ]
+    IgG <- IgG[IgG$Sample == samplelist[i], ]
+    IgA <- IgA[IgA$Sample == samplelist[i], ]
+    IgM <- IgM[IgM$Sample == samplelist[i], ]
+    IgE <- IgE[IgE$Sample == samplelist[i], ]
+
+    clone.mut.iso[i,1] <- samplelist[i]
+
+if (nrow(Ig) > 0){
+    df.lineagedata.Ig <- summaryBy(V_Mutations ~ lineageID, data = Ig, FUN = list(mean, max, min, median, sd))
+    clone.mut.iso[i,2] <- round(mean(df.lineagedata.Ig$V_Mutations.mean),2)
+    clone.mut.iso[i,3] <- median(df.lineagedata.Ig$V_Mutations.median)
+    clone.mut.iso[i,4] <- round(mean(df.lineagedata.Ig$V_Mutations.min),2)
+} else {
+    clone.mut.iso[i,2] <- 'N/A'
+    clone.mut.iso[i,3] <- 'N/A'
+    clone.mut.iso[i,4] <- 'N/A'
+}
+    if (nrow(IgG) > 0){
+    df.lineagedata.IgG <- summaryBy(V_Mutations ~ lineageID, data = IgG, FUN = list(mean, max, min, median, sd))
+    clone.mut.iso[i,5] <- round(mean(df.lineagedata.IgG$V_Mutations.mean),2)
+    clone.mut.iso[i,6] <- median(df.lineagedata.IgG$V_Mutations.median)
+    clone.mut.iso[i,7] <- round(mean(df.lineagedata.IgG$V_Mutations.min),2)
+} else {
+    clone.mut.iso[i,5] <- 'N/A'
+    clone.mut.iso[i,6] <- 'N/A'
+    clone.mut.iso[i,7] <- 'N/A'
+}
+    if (nrow(IgA) > 0){
+    df.lineagedata.IgA <- summaryBy(V_Mutations ~ lineageID, data = IgA, FUN = list(mean, max, min, median, sd))
+    clone.mut.iso[i,8] <- round(mean(df.lineagedata.IgA$V_Mutations.mean),2)
+    clone.mut.iso[i,9] <- median(df.lineagedata.IgA$V_Mutations.median)
+    clone.mut.iso[i,10] <- round(mean(df.lineagedata.IgA$V_Mutations.min),2)
+} else {
+    clone.mut.iso[i,8] <- 'N/A'
+    clone.mut.iso[i,9] <- 'N/A'
+    clone.mut.iso[i,10] <- 'N/A'
+}
+    if (nrow(IgM) > 0){
+    df.lineagedata.IgM <- summaryBy(V_Mutations ~ lineageID, data = IgM, FUN = list(mean, max, min, median, sd))
+    clone.mut.iso[i,11] <- round(mean(df.lineagedata.IgM$V_Mutations.mean),2)
+    clone.mut.iso[i,12] <- median(df.lineagedata.IgM$V_Mutations.median)
+    clone.mut.iso[i,13] <- round(mean(df.lineagedata.IgM$V_Mutations.min),2)
+} else {
+    clone.mut.iso[i,11] <- 'N/A'
+    clone.mut.iso[i,12] <- 'N/A'
+    clone.mut.iso[i,13] <- 'N/A'
+}
+    if (nrow(IgE) > 0){
+    df.lineagedata.IgE <- summaryBy(V_Mutations ~ lineageID, data = IgE, FUN = list(mean, max, min, median, sd))
+    clone.mut.iso[i,14] <- round(mean(df.lineagedata.IgE$V_Mutations.mean),2)
+    clone.mut.iso[i,15] <- median(df.lineagedata.IgE$V_Mutations.median)
+    clone.mut.iso[i,16] <- round(mean(df.lineagedata.IgE$V_Mutations.min),2)
+} else {
+    clone.mut.iso[i,14] <- 'N/A'
+    clone.mut.iso[i,15] <- 'N/A'
+    clone.mut.iso[i,16] <- 'N/A'
+}
+    }
+    colnames(clone.mut.iso) <- c('Sample', 'Ig Mean Clonal Mutation', 'Ig Median Clonal Mutation', 'Ig Mean Trunk Length', 'IgG Mean Clonal Mutation', 'IgG Median Clonal Mutation', 'IgG Mean Trunk Length', 'IgA Mean Clonal Mutation', 'IgA Median Clonal Mutation', 'IgA Mean Trunk Length', 'IgM Mean Clonal Mutation', 'IgM Median Clonal Mutation', 'IgM Mean Trunk Length', 'IgE Mean Clonal Mutation', 'IgE Median Clonal Mutation', 'IgE Mean Trunk Length')
+
+master.data <- cbind(master.data, clone.mut.iso[,c(2:ncol(clone.mut.iso))])
 
     write.table(master.data, file = master.out, quote = FALSE, sep = "\t", row.names = FALSE)
     }
