@@ -25,7 +25,7 @@ seqanalysis <- function(location) {
     }
 
     # establish input and output file locations
-    location <- '/Users/cmtipto/Desktop/Test/999'
+    #location <- '/Users/cmtipto/Desktop/Test/999'
     location2 <- location
     #location <- paste0(location, "/IgSeq")
     # file.dir <- paste0(location, '/lineageOutput/withIdenticals/') file.x <<-

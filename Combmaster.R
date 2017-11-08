@@ -5,4 +5,5 @@ file_list <- list.files(path=dir,
                                 pattern="Master*"
                                 ,full.names=T)
 master.df <<- ldply(file_list, read.table, header=TRUE, sep="\t")
+print('Combined dataframe now stored as master.df')
 }
